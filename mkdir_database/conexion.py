@@ -5,8 +5,8 @@ def conectar():
     try:
         conexion = pyodbc.connect(
             'DRIVER={ODBC Driver 17 for SQL Server};'
-            'SERVER=DESKTOP-1RNSV4J\\SQLEXPRESS;'
-            'DATABASE=DistribuidoraDB;'
+            'SERVER=localhost\\SQLEXPRESS;'
+            'DATABASE=Distribuidora;'
             'Trusted_Connection=yes;'
         )
         return conexion

@@ -1,4 +1,4 @@
-<LoginScreen>:
+<CrearUsuarioScreen>:
     AnchorLayout:
         anchor_x: 'center'
         anchor_y: 'center'
@@ -9,31 +9,16 @@
             height: self.minimum_height
             spacing: dp(20)
             padding: dp(30)
-            canvas.before:
-                Color:
-                    rgba: 0.95, 0.95, 0.97, 1
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
 
             Label:
-                text: "Sistema de Distribuidora"
-                font_size: dp(34)
+                text: "Crear nuevo usuario"
+                font_size: dp(30)
                 bold: True
                 color: 0.2, 0.2, 0.2, 1
-                size_hint_y: None
-                height: dp(60)
-
-            Label:
-                text: "Iniciar Sesión"
-                font_size: dp(22)
-                color: 0.4, 0.4, 0.4, 1
-                size_hint_y: None
-                height: dp(40)
 
             TextInput:
                 id: usuario_input
-                hint_text: "Usuario"
+                hint_text: "Nombre de usuario"
                 size_hint_y: None
                 height: dp(45)
                 multiline: False
@@ -46,6 +31,13 @@
                 multiline: False
                 password: True
 
+            TextInput:
+                id: rol_input
+                hint_text: "Rol (ej: Empleado, Vendedor)"
+                size_hint_y: None
+                height: dp(45)
+                multiline: False
+
             Label:
                 id: mensaje_label
                 text: ""
@@ -57,15 +49,30 @@
                 text_size: self.size
 
             Button:
-                text: "Iniciar Sesión"
+                text: "Crear Usuario"
                 size_hint: (0.5, None)
                 height: dp(50)
                 pos_hint: {"center_x": 0.5}
                 font_size: dp(18)
-                on_release: root.validar_login(usuario_input.text, password_input.text)
+                on_release: root.validar_admin()
                 canvas.before:
                     Color:
                         rgba: 0.2, 0.6, 0.9, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [12]
+
+            Button:
+                text: "Volver al Login"
+                size_hint: (0.4, None)
+                height: dp(45)
+                pos_hint: {"center_x": 0.5}
+                font_size: dp(16)
+                on_release: root.volver_al_login()
+                canvas.before:
+                    Color:
+                        rgba: 0.5, 0.5, 0.5, 1
                     RoundedRectangle:
                         pos: self.pos
                         size: self.size
