@@ -1,13 +1,10 @@
-from kivy.uix.boxlayout import BoxLayout
-import sys
-import os
+from kivy.uix.screenmanager import Screen
 import hashlib
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from mkdir_database.conexion import ejecutar_consulta
 
-class LoginScreen(BoxLayout):
-    """Pantalla de login"""
+
+class LoginScreen(Screen):
+    """Pantalla de inicio de sesión"""
 
     def validar_login(self, usuario, password):
         if not usuario or not password:
@@ -33,26 +30,25 @@ class LoginScreen(BoxLayout):
                 'EmpleadoID': resultado[0][4]
             }
 
-            print(f"Usuario autenticado: {usuario_data}")
+            print(f"✅ Usuario autenticado: {usuario_data}")
+            self.mostrar_mensaje(f"Bienvenido {usuario_data['NombreUsuario']}", error=False)
 
+            # Cambiar de pantalla según el rol
             rol = usuario_data['RolNombre'].lower()
             if rol == 'administrador':
-                from mkdir_pantallas.panel_admin import PanelAdminScreen
-                self.clear_widgets()
-                self.add_widget(PanelAdminScreen())
+                self.manager.current = "factura"  # Podés cambiarlo por "panel_admin"
             else:
-                from mkdir_pantallas.menu_principal import MenuPrincipalScreen
-                self.clear_widgets()
-                self.add_widget(MenuPrincipalScreen())
+                self.manager.current = "factura"
 
-            self.mostrar_mensaje(f"Bienvenido {usuario_data['NombreUsuario']}", error=False)
             return True
         else:
             self.mostrar_mensaje("Usuario o contraseña incorrectos", error=True)
             return False
 
     def mostrar_mensaje(self, mensaje, error=True):
+        """Muestra mensajes en la etiqueta del login"""
         if hasattr(self, 'ids') and 'mensaje_label' in self.ids:
             mensaje_label = self.ids.mensaje_label
             mensaje_label.text = mensaje
             mensaje_label.color = (1, 0, 0, 1) if error else (0, 1, 0, 1)
+            print(f"Mensaje mostrado: {mensaje}")

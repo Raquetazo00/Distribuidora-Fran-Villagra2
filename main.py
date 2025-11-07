@@ -1,38 +1,72 @@
 from kivy.app import App
-from kivy.core.window import Window 
+from kivy.core.window import Window
 from kivy.lang import Builder
-import os
-import sys
+from kivy.uix.screenmanager import ScreenManager
+import os, sys
 
-# Configurar ventana (responsive base)
+# ================================
+# CONFIGURACIÓN DE VENTANA
+# ================================
 Window.size = (1000, 650)
 Window.minimum_width, Window.minimum_height = 800, 500
 Window.clearcolor = (0.95, 0.95, 0.97, 1)
 
-# Agregar ruta de pantallas
-ruta_pantallas = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mkdir_pantallas')
-if ruta_pantallas not in sys.path:
-    sys.path.insert(0, ruta_pantallas)
+# ================================
+# RUTAS
+# ================================
+BASE_PATH = os.path.dirname(os.path.abspath(__file__))
+RUTA_PANTALLAS = os.path.join(BASE_PATH, 'mkdir_pantallas')
 
+if RUTA_PANTALLAS not in sys.path:
+    sys.path.insert(0, RUTA_PANTALLAS)
+
+# ================================
+# IMPORTAR PANTALLAS
+# ================================
 from login import LoginScreen
+from mkdir_pantallas.facturas_sc import FacturaScreen
 
+
+# ================================
+# GESTOR DE PANTALLAS
+# ================================
+class WindowManager(ScreenManager):
+    pass
+
+
+# ================================
+# APLICACIÓN PRINCIPAL
+# ================================
 class DistribuidoraApp(App):
     def build(self):
-        base_path = ruta_pantallas
-        # Cargar todos los .kv
-        for kv_file in [
+        sm = WindowManager()
+
+        # Cargar archivos .kv
+        kv_files = [
             'login_sc.kv',
             'crear_usuario.kv',
             'menu_principal.kv',
-            'panel_admin.kv'
-        ]:
-            kv_path = os.path.join(base_path, kv_file)
+            'panel_admin.kv',
+            'facturas_sc.kv'
+        ]
+        for kv_file in kv_files:
+            kv_path = os.path.join(RUTA_PANTALLAS, kv_file)
+            print("Buscando:", kv_path)
             if os.path.exists(kv_path):
                 Builder.load_file(kv_path)
-                print(f"Archivo .kv cargado: {kv_path}")
+                print(f"✅ Archivo .kv cargado: {kv_path}")
             else:
-                print(f"Error: No se encontró el archivo .kv en: {kv_path}")
-        return LoginScreen()
+                print(f"⚠️ No se encontró el archivo .kv: {kv_path}")
+
+        # Agregar pantallas
+        sm.add_widget(LoginScreen(name="login"))
+        sm.add_widget(FacturaScreen(name="factura"))
+
+        # 🟢 Establecer pantalla inicial (login)
+        sm.current = "login"
+
+        return sm
+
 
 if __name__ == "__main__":
     DistribuidoraApp().run()

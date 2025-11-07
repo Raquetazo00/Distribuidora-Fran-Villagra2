@@ -17,22 +17,17 @@ def conectar():
         print(f"Error inesperado: {error}")
         return None
 
+
 def cerrar_conexion(conexion):
     """Cierra la conexión"""
     if conexion:
         conexion.close()
         print("Conexión cerrada")
 
+
 def ejecutar_consulta(consulta, parametros=None):
     """
     Ejecuta una consulta SQL genérica
-    
-    Args:
-        consulta: Consulta SQL a ejecutar
-        parametros: Tupla o lista de parámetros (opcional)
-    
-    Returns:
-        Resultados de la consulta si es SELECT, o número de filas afectadas
     """
     conexion = conectar()
     if not conexion:
@@ -58,14 +53,55 @@ def ejecutar_consulta(consulta, parametros=None):
     finally:
         cerrar_conexion(conexion)
 
-# Ejemplo de uso
+
+def obtener_productos():
+    """Obtiene todos los productos activos"""
+    conn = conectar()  # ✅ corregido (antes decía conexion())
+    if not conn:
+        print("No se pudo conectar a la base de datos")
+        return []
+
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT ProductoID, Nombre, Precio, Stock FROM Productos")
+        productos = cursor.fetchall()
+        return productos
+    except pyodbc.Error as error:
+        print(f"Error al obtener productos: {error}")
+        return []
+    finally:
+        conn.close()
+
+
+def descontar_stock(producto_id, cantidad):
+    """Descuenta stock de un producto"""
+    conn = conectar()
+    if not conn:
+        print("No se pudo conectar a la base de datos")
+        return
+
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE dbo.Productos
+            SET Stock = Stock - ?
+            WHERE ProductoID = ? AND Stock >= ?
+        """, (cantidad, producto_id, cantidad))
+        conn.commit()
+    except pyodbc.Error as error:
+        print(f"Error al descontar stock: {error}")
+        conn.rollback()
+    finally:
+        conn.close()
+
+
+# Prueba manual (solo si ejecutás este archivo directamente)
 if __name__ == "__main__":
-    # Prueba la conexión
     conexion = conectar()
     if conexion:
         print("Conexión exitosa a SQL Server")
         cerrar_conexion(conexion)
-    
-    # Ejemplo de consulta
-    # resultados = ejecutar_consulta("SELECT * FROM Usuarios")
-    # print(resultados)
+
+    productos = obtener_productos()
+    for p in productos:
+        print(p)
