@@ -1,0 +1,122 @@
+<AgregarProductoScreen>:
+    orientation: "vertical"
+    padding: dp(20)
+    spacing: dp(10)
+
+    Label:
+        text: "Gestión de Productos"
+        font_size: dp(28)
+        bold: True
+        color: 0, 0, 0, 1
+        size_hint_y: None
+        height: dp(50)
+
+    # ------------------------------
+    # FORMULARIO DE PRODUCTO
+    # ------------------------------
+    GridLayout:
+        cols: 2
+        row_default_height: dp(35)
+        size_hint_y: None
+        height: self.minimum_height
+        spacing: dp(10)
+
+        Label:
+            text: "Nombre:"
+            color: 0, 0, 0, 1
+        TextInput:
+            id: nombre_input
+
+        Label:
+            text: "Descripción:"
+            color: 0, 0, 0, 1
+        TextInput:
+            id: descripcion_input
+
+        Label:
+            text: "Precio:"
+            color: 0, 0, 0, 1
+        TextInput:
+            id: precio_input
+            input_filter: "float"
+
+        Label:
+            text: "Stock:"
+            color: 0, 0, 0, 1
+        TextInput:
+            id: stock_input
+            input_filter: "int"
+
+        Label:
+            text: "Fecha Vencimiento:"
+            color: 0, 0, 0, 1
+        TextInput:
+            id: fecha_input
+            hint_text: "YYYY-MM-DD"
+
+        Label:
+            text: "Código de Barras:"
+            color: 0, 0, 0, 1
+        TextInput:
+            id: codigo_input
+
+    Button:
+        id: boton_agregar
+        text: "Agregar Producto"
+        size_hint_y: None
+        height: dp(45)
+        on_release: root.agregar_o_actualizar_producto()
+        background_color: 0.2, 0.6, 0.9, 1
+        color: 1, 1, 1, 1
+
+    # ------------------------------
+    # CAMPO DE BÚSQUEDA EN TIEMPO REAL
+    # ------------------------------
+    BoxLayout:
+        size_hint_y: None
+        height: dp(45)
+        spacing: dp(10)
+
+        TextInput:
+            id: buscar_input
+            hint_text: "Buscar producto por nombre o código..."
+            multiline: False
+            on_text: root.buscar_productos()  # 🔍 Actualiza automáticamente al escribir
+
+        Button:
+            text: "Buscar"
+            size_hint_x: None
+            width: dp(120)
+            background_color: 0.1, 0.6, 0.8, 1
+            color: 1, 1, 1, 1
+            on_release: root.buscar_productos()
+
+    # ------------------------------
+    # TABLA DE PRODUCTOS
+    # ------------------------------
+    ScrollView:
+        size_hint_y: 1
+        bar_width: dp(10)
+        scroll_type: ['bars', 'content']
+
+        BoxLayout:
+            id: tabla_productos
+            orientation: "vertical"
+            size_hint_y: None
+            height: self.minimum_height
+            spacing: dp(5)
+            padding: dp(10)
+            canvas.before:
+                Color:
+                    rgba: 0.96, 0.96, 0.96, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+    Button:
+        text: "Volver al Panel"
+        size_hint_y: None
+        height: dp(45)
+        on_release: root.volver_al_panel()
+        background_color: 0.4, 0.4, 0.4, 1
+        color: 1, 1, 1, 1

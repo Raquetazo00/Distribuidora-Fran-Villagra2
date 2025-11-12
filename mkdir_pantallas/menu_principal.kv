@@ -2,12 +2,13 @@
     AnchorLayout:
         anchor_x: 'center'
         anchor_y: 'center'
+
         BoxLayout:
             orientation: "vertical"
-            size_hint: 0.9, None
+            size_hint: 0.92, None
             height: self.minimum_height
-            spacing: dp(25)
-            padding: dp(30)
+            spacing: dp(20)
+            padding: dp(20)
             canvas.before:
                 Color:
                     rgba: 0.95, 0.95, 0.97, 1
@@ -15,35 +16,147 @@
                     pos: self.pos
                     size: self.size
 
+            # -----------------------
+            # Encabezado (título, reloj, salir)
+            # -----------------------
+            BoxLayout:
+                size_hint_y: None
+                height: dp(45)
+                spacing: dp(10)
+
+                Label:
+                    text: "Menú Principal"
+                    font_size: dp(28)
+                    bold: True
+                    color: 0.2, 0.2, 0.2, 1
+
+                Widget:
+
+                Label:
+                    text: root.hora_actual
+                    font_size: dp(18)
+                    bold: True
+                    color: 0.1, 0.1, 0.1, 1
+                    size_hint_x: None
+                    width: dp(100)
+
+                Button:
+                    text: "Salir"
+                    size_hint: None, None
+                    size: dp(80), dp(35)
+                    on_release: root.confirmar_salida()
+                    font_size: dp(14)
+                    color: 1, 1, 1, 1
+                    canvas.before:
+                        Color:
+                            rgba: 0.9, 0.2, 0.2, 1
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [8]
+
+            # -----------------------
+            # Campo de búsqueda
+            # -----------------------
+            BoxLayout:
+                size_hint_y: None
+                height: dp(45)
+                spacing: dp(10)
+
+                TextInput:
+                    id: buscar_input
+                    hint_text: "Buscar producto por nombre o código de barras…"
+                    multiline: False
+                    on_text_validate: root.programar_busqueda(self.text)
+
+                Button:
+                    text: "Buscar"
+                    size_hint_x: None
+                    width: dp(120)
+                    on_release: root.buscar_producto(buscar_input.text)
+                    canvas.before:
+                        Color:
+                            rgba: 0.2, 0.6, 0.9, 1
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [10]
+                    color: 1, 1, 1, 1
+
+            # -----------------------
+            # Resultados de búsqueda (productos)
+            # -----------------------
             Label:
-                text: "Menú Principal"
-                font_size: dp(32)
+                text: "Productos disponibles"
+                font_size: dp(18)
                 bold: True
-                color: 0.2, 0.2, 0.2, 1
+                color: 0.1, 0.1, 0.1, 1
+                size_hint_y: None
+                height: dp(35)
+
+            ScrollView:
+                size_hint_y: None
+                height: dp(200)
+                bar_width: dp(10)
+                scroll_type: ['bars', 'content']
+
+                BoxLayout:
+                    id: tabla_productos
+                    orientation: "vertical"
+                    size_hint_y: None
+                    height: self.minimum_height
+                    spacing: dp(4)
+                    padding: dp(6)
+
+            # -----------------------
+            # Carrito de productos
+            # -----------------------
+            Label:
+                text: "Productos en la venta actual"
+                font_size: dp(18)
+                bold: True
+                color: 0.1, 0.1, 0.1, 1
+                size_hint_y: None
+                height: dp(35)
+
+            ScrollView:
+                size_hint_y: None
+                height: dp(200)
+                bar_width: dp(10)
+                scroll_type: ['bars', 'content']
+
+                BoxLayout:
+                    id: tabla_carrito
+                    orientation: "vertical"
+                    size_hint_y: None
+                    height: self.minimum_height
+                    spacing: dp(4)
+                    padding: dp(6)
+                    canvas.before:
+                        Color:
+                            rgba: 0.98, 0.98, 0.99, 1
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+
+            # -----------------------
+            # Total + Finalizar Venta
+            # -----------------------
+            BoxLayout:
                 size_hint_y: None
                 height: dp(60)
+                spacing: dp(10)
 
-            Label:
-                text: "Bienvenido al sistema de distribuidora"
-                font_size: dp(18)
-                color: 0.3, 0.3, 0.3, 1
-                halign: 'center'
-                text_size: self.size
+                Label:
+                    id: lbl_total
+                    text: "Total: $0.00"
+                    font_size: dp(22)
+                    bold: True
+                    color: 0, 0, 0, 1
 
-            Widget:
-                size_hint_y: 0.1
-
-            Button:
-                text: "Volver al Login"
-                size_hint: (0.4, None)
-                height: dp(45)
-                pos_hint: {"center_x": 0.5}
-                font_size: dp(16)
-                on_release: root.volver_al_login()
-                canvas.before:
-                    Color:
-                        rgba: 0.5, 0.5, 0.5, 1
-                    RoundedRectangle:
-                        pos: self.pos
-                        size: self.size
-                        radius: [12]
+                Button:
+                    text: "Previsualizar Venta"
+                    background_color: 0.1, 0.6, 0.3, 1
+                    color: 1, 1, 1, 1
+                    font_size: dp(18)
+                    on_release: root.previsualizar_venta()

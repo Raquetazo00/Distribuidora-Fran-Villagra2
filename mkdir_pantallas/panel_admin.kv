@@ -33,6 +33,9 @@
             Widget:
                 size_hint_y: 0.1
 
+            # ---------------------------
+            # Botón: Crear Usuario
+            # ---------------------------
             Button:
                 text: "Crear Usuario"
                 size_hint: (0.6, None)
@@ -48,9 +51,30 @@
                         size: self.size
                         radius: [12]
 
+            # ---------------------------
+            # Botón: Agregar Producto
+            # ---------------------------
+            Button:
+                text: "Agregar Producto"
+                size_hint: (0.6, None)
+                height: dp(50)
+                pos_hint: {"center_x": 0.5}
+                on_release: root.ir_a_agregar_producto()
+                font_size: dp(18)
+                canvas.before:
+                    Color:
+                        rgba: 0.1, 0.7, 0.4, 1   # verde para diferenciarlo
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [12]
+
             Widget:
                 size_hint_y: 0.1
 
+            # ---------------------------
+            # Botón: Volver al Login
+            # ---------------------------
             Button:
                 text: "Volver al Login"
                 size_hint: (0.4, None)
