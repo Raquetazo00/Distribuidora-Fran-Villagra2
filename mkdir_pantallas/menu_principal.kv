@@ -1,4 +1,5 @@
 <MenuPrincipalScreen>:
+<<<<<<< Updated upstream
     AnchorLayout:
         anchor_x: 'center'
         anchor_y: 'center'
@@ -47,3 +48,105 @@
                         pos: self.pos
                         size: self.size
                         radius: [12]
+=======
+    BoxLayout:
+        orientation: "vertical"
+        spacing: dp(10)
+        padding: dp(10)
+
+        # Encabezado simple
+        BoxLayout:
+            size_hint_y: None
+            height: dp(50)
+            spacing: dp(10)
+
+            Label:
+                text: "Menú Principal"
+                font_size: dp(24)
+                bold: True
+
+            Button:
+                text: "Facturación"
+                size_hint_x: None
+                width: dp(120)
+                on_release: root.ir_a_facturacion()
+
+            Button:
+                text: "Salir"
+                size_hint_x: None
+                width: dp(100)
+                on_release: root.confirmar_salida()
+
+        # Resto de contenido
+        BoxLayout:
+            orientation: "vertical"
+            spacing: dp(10)
+
+            Label:
+                text: "Búsqueda de productos"
+                font_size: dp(16)
+                bold: True
+                size_hint_y: None
+                height: dp(30)
+
+            BoxLayout:
+                size_hint_y: None
+                height: dp(45)
+                spacing: dp(10)
+
+                TextInput:
+                    id: buscar_input
+                    hint_text: "Buscar producto…"
+                    multiline: False
+
+                Button:
+                    text: "Buscar"
+                    size_hint_x: None
+                    width: dp(120)
+                    on_release: root.buscar_producto(buscar_input.text)
+
+            Label:
+                text: "Productos disponibles"
+                font_size: dp(16)
+                bold: True
+                size_hint_y: None
+                height: dp(30)
+
+            ScrollView:
+                BoxLayout:
+                    id: tabla_productos
+                    orientation: "vertical"
+                    size_hint_y: None
+                    height: self.minimum_height
+                    spacing: dp(5)
+
+            Label:
+                text: "Carrito"
+                font_size: dp(16)
+                bold: True
+                size_hint_y: None
+                height: dp(30)
+
+            ScrollView:
+                BoxLayout:
+                    id: tabla_carrito
+                    orientation: "vertical"
+                    size_hint_y: None
+                    height: self.minimum_height
+                    spacing: dp(5)
+
+            BoxLayout:
+                size_hint_y: None
+                height: dp(50)
+                spacing: dp(10)
+
+                Label:
+                    id: lbl_total
+                    text: "Total: $0.00"
+                    font_size: dp(18)
+                    bold: True
+
+                Button:
+                    text: "Previsualizar Venta"
+                    on_release: root.previsualizar_venta()
+>>>>>>> Stashed changes

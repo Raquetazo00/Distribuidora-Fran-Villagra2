@@ -87,3 +87,8 @@ class CrearUsuarioScreen(BoxLayout):
         from mkdir_pantallas.login import LoginScreen
         self.clear_widgets()
         self.add_widget(LoginScreen())
+
+    def volver_al_menu(self):
+        from mkdir_pantallas.menu_principal import MenuPrincipalScreen
+        self.clear_widgets()
+        self.add_widget(MenuPrincipalScreen())

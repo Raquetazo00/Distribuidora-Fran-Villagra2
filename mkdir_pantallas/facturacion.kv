@@ -1,0 +1,369 @@
+<FacturacionScreen>:
+    AnchorLayout:
+        anchor_x: 'center'
+        anchor_y: 'top'
+
+        ScrollView:
+            size_hint: 0.98, 0.98
+
+            BoxLayout:
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(15)
+                padding: dp(15)
+                canvas.before:
+                    Color:
+                        rgba: 0.95, 0.95, 0.97, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+                # =====================
+                # Encabezado
+                # =====================
+                BoxLayout:
+                    size_hint_y: None
+                    height: dp(45)
+                    spacing: dp(10)
+
+                    Label:
+                        text: "Facturación"
+                        font_size: dp(28)
+                        bold: True
+                        color: 0.2, 0.2, 0.2, 1
+
+                    Widget:
+
+                    Button:
+                        text: "Volver"
+                        size_hint: None, None
+                        size: dp(100), dp(35)
+                        on_release: root.volver_menu()
+                        font_size: dp(14)
+                        canvas.before:
+                            Color:
+                                rgba: 0.6, 0.6, 0.6, 1
+                            RoundedRectangle:
+                                pos: self.pos
+                                size: self.size
+                                radius: [8]
+
+                # =====================
+                # Datos del Cliente (4 campos)
+                # =====================
+                Label:
+                    text: "Datos del Cliente"
+                    font_size: dp(16)
+                    bold: True
+                    size_hint_y: None
+                    height: dp(30)
+                    color: 0.2, 0.2, 0.2, 1
+
+                BoxLayout:
+                    orientation: "horizontal"
+                    size_hint_y: None
+                    height: dp(50)
+                    spacing: dp(10)
+
+                    BoxLayout:
+                        orientation: "vertical"
+                        spacing: dp(5)
+                        
+                        Label:
+                            text: "Nombre"
+                            size_hint_y: None
+                            height: dp(20)
+                            font_size: dp(12)
+                            bold: True
+
+                        TextInput:
+                            id: cliente_nombre
+                            hint_text: "Nombre"
+                            multiline: False
+                            size_hint_y: None
+                            height: dp(35)
+
+                    BoxLayout:
+                        orientation: "vertical"
+                        spacing: dp(5)
+                        
+                        Label:
+                            text: "Apellido"
+                            size_hint_y: None
+                            height: dp(20)
+                            font_size: dp(12)
+                            bold: True
+
+                        TextInput:
+                            id: cliente_apellido
+                            hint_text: "Apellido"
+                            multiline: False
+                            size_hint_y: None
+                            height: dp(35)
+
+                    BoxLayout:
+                        orientation: "vertical"
+                        spacing: dp(5)
+                        
+                        Label:
+                            text: "Teléfono"
+                            size_hint_y: None
+                            height: dp(20)
+                            font_size: dp(12)
+                            bold: True
+
+                        TextInput:
+                            id: cliente_telefono
+                            hint_text: "Número de teléfono"
+                            multiline: False
+                            input_filter: 'int'
+                            size_hint_y: None
+                            height: dp(35)
+
+                    BoxLayout:
+                        orientation: "vertical"
+                        spacing: dp(5)
+                        
+                        Label:
+                            text: "Email"
+                            size_hint_y: None
+                            height: dp(20)
+                            font_size: dp(12)
+                            bold: True
+
+                        TextInput:
+                            id: cliente_email
+                            hint_text: "correo@ejemplo.com"
+                            multiline: False
+                            size_hint_y: None
+                            height: dp(35)
+
+                # =====================
+                # CI/RUT (opcional para compatibilidad)
+                # =====================
+                BoxLayout:
+                    orientation: "horizontal"
+                    size_hint_y: None
+                    height: dp(50)
+                    spacing: dp(10)
+
+                    BoxLayout:
+                        orientation: "vertical"
+                        spacing: dp(5)
+                        size_hint_x: 0.3
+                        
+                        Label:
+                            text: "C.I. / RUT"
+                            size_hint_y: None
+                            height: dp(20)
+                            font_size: dp(12)
+                            bold: True
+
+                        TextInput:
+                            id: cliente_ci
+                            hint_text: "C.I."
+                            multiline: False
+                            size_hint_y: None
+                            height: dp(35)
+
+                    Widget:
+
+                # =====================
+                # Agregar Productos
+                # =====================
+                BoxLayout:
+                    orientation: "horizontal"
+                    size_hint_y: None
+                    height: dp(55)
+                    spacing: dp(10)
+
+                    Label:
+                        text: "Producto:"
+                        size_hint_x: None
+                        width: dp(80)
+                        font_size: dp(14)
+                        bold: True
+
+                    Spinner:
+                        id: spinner_productos
+                        text: "Seleccionar producto"
+                        values: [p['nombre'] for p in root.productos_disponibles]
+                        size_hint_x: 0.4
+
+                    Label:
+                        text: "Cantidad:"
+                        size_hint_x: None
+                        width: dp(80)
+                        font_size: dp(14)
+                        bold: True
+
+                    TextInput:
+                        id: cantidad_producto
+                        hint_text: "0"
+                        multiline: False
+                        input_filter: 'int'
+                        size_hint_x: 0.2
+
+                    Button:
+                        text: "Agregar"
+                        size_hint_x: 0.2
+                        on_release: root.agregar_producto(spinner_productos.text, cantidad_producto.text) if spinner_productos.text != "Seleccionar producto" else None
+                        canvas.before:
+                            Color:
+                                rgba: 0.2, 0.6, 0.9, 1
+                            RoundedRectangle:
+                                pos: self.pos
+                                size: self.size
+                                radius: [8]
+
+                # =====================
+                # Carrito (tabla)
+                # =====================
+                Label:
+                    text: "Carrito de Compras"
+                    size_hint_y: None
+                    height: dp(30)
+                    font_size: dp(16)
+                    bold: True
+                    color: 0.2, 0.2, 0.2, 1
+
+                ScrollView:
+                    size_hint_y: None
+                    height: dp(250)
+
+                    GridLayout:
+                        id: carrito_grid
+                        cols: 5
+                        spacing: dp(5)
+                        size_hint_y: None
+                        height: self.minimum_height
+                        padding: dp(5)
+
+                        # Encabezados
+                        Label:
+                            text: "Producto"
+                            bold: True
+                            size_hint_y: None
+                            height: dp(35)
+                            canvas.before:
+                                Color:
+                                    rgba: 0.7, 0.7, 0.7, 1
+                                Rectangle:
+                                    pos: self.pos
+                                    size: self.size
+
+                        Label:
+                            text: "Precio"
+                            bold: True
+                            size_hint_y: None
+                            height: dp(35)
+                            canvas.before:
+                                Color:
+                                    rgba: 0.7, 0.7, 0.7, 1
+                                Rectangle:
+                                    pos: self.pos
+                                    size: self.size
+
+                        Label:
+                            text: "Cantidad"
+                            bold: True
+                            size_hint_y: None
+                            height: dp(35)
+                            canvas.before:
+                                Color:
+                                    rgba: 0.7, 0.7, 0.7, 1
+                                Rectangle:
+                                    pos: self.pos
+                                    size: self.size
+
+                        Label:
+                            text: "Subtotal"
+                            bold: True
+                            size_hint_y: None
+                            height: dp(35)
+                            canvas.before:
+                                Color:
+                                    rgba: 0.7, 0.7, 0.7, 1
+                                Rectangle:
+                                    pos: self.pos
+                                    size: self.size
+
+                        Label:
+                            text: "Acción"
+                            bold: True
+                            size_hint_y: None
+                            height: dp(35)
+                            canvas.before:
+                                Color:
+                                    rgba: 0.7, 0.7, 0.7, 1
+                                Rectangle:
+                                    pos: self.pos
+                                    size: self.size
+
+                # =====================
+                # Totales
+                # =====================
+                BoxLayout:
+                    orientation: "horizontal"
+                    size_hint_y: None
+                    height: dp(40)
+                    spacing: dp(10)
+
+                    Label:
+                        text: f"Cantidad de artículos: {int(root.cantidad_items)}"
+                        font_size: dp(14)
+                        bold: True
+
+                    Widget:
+
+                    Label:
+                        text: f"Total: Bs. {root.total_carrito:.2f}"
+                        font_size: dp(16)
+                        bold: True
+                        color: 0.2, 0.6, 0.9, 1
+                        size_hint_x: None
+                        width: dp(200)
+
+                # =====================
+                # Botones de Acción
+                # =====================
+                BoxLayout:
+                    size_hint_y: None
+                    height: dp(50)
+                    spacing: dp(10)
+
+                    Button:
+                        text: "Limpiar Carrito"
+                        on_release: root.limpiar_carrito()
+                        canvas.before:
+                            Color:
+                                rgba: 0.9, 0.4, 0.4, 1
+                            RoundedRectangle:
+                                pos: self.pos
+                                size: self.size
+                                radius: [8]
+
+                    Widget:
+
+                    Button:
+                        text: "Generar Factura"
+                        on_release: root.generar_factura(cliente_nombre.text, cliente_apellido.text, cliente_telefono.text, cliente_email.text, cliente_ci.text)
+                        canvas.before:
+                            Color:
+                                rgba: 0.2, 0.8, 0.2, 1
+                            RoundedRectangle:
+                                pos: self.pos
+                                size: self.size
+                                radius: [8]
+
+                # =====================
+                # Mensajes
+                # =====================
+                Label:
+                    id: mensaje_label
+                    text: ""
+                    font_size: dp(12)
+                    size_hint_y: None
+                    height: dp(25)
+                    color: 1, 0, 0, 1

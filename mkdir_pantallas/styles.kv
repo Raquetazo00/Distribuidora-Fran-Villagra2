@@ -1,0 +1,21 @@
+#:import dp kivy.metrics.dp
+
+<Label>:
+    color: app.text_color if hasattr(app, 'text_color') else (0, 0, 0, 1)
+
+<Button>:
+    color: app.text_color if hasattr(app, 'text_color') else (1, 1, 1, 1)
+
+<ToggleButton>:
+    color: app.text_color if hasattr(app, 'text_color') else (1, 1, 1, 1)
+
+<TextInput>:
+    foreground_color: app.text_color if hasattr(app, 'text_color') else (0, 0, 0, 1)
+    cursor_color: app.text_color if hasattr(app, 'text_color') else (0, 0, 0, 1)
+
+<Spinner>:
+    color: app.text_color if hasattr(app, 'text_color') else (0, 0, 0, 1)
+
+# Small default for Menu labels/buttons
+[Label@Widget]:
+    font_size: dp(14)
