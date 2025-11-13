@@ -1,54 +1,4 @@
 <MenuPrincipalScreen>:
-<<<<<<< Updated upstream
-    AnchorLayout:
-        anchor_x: 'center'
-        anchor_y: 'center'
-        BoxLayout:
-            orientation: "vertical"
-            size_hint: 0.9, None
-            height: self.minimum_height
-            spacing: dp(25)
-            padding: dp(30)
-            canvas.before:
-                Color:
-                    rgba: 0.95, 0.95, 0.97, 1
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
-
-            Label:
-                text: "Menú Principal"
-                font_size: dp(32)
-                bold: True
-                color: 0.2, 0.2, 0.2, 1
-                size_hint_y: None
-                height: dp(60)
-
-            Label:
-                text: "Bienvenido al sistema de distribuidora"
-                font_size: dp(18)
-                color: 0.3, 0.3, 0.3, 1
-                halign: 'center'
-                text_size: self.size
-
-            Widget:
-                size_hint_y: 0.1
-
-            Button:
-                text: "Volver al Login"
-                size_hint: (0.4, None)
-                height: dp(45)
-                pos_hint: {"center_x": 0.5}
-                font_size: dp(16)
-                on_release: root.volver_al_login()
-                canvas.before:
-                    Color:
-                        rgba: 0.5, 0.5, 0.5, 1
-                    RoundedRectangle:
-                        pos: self.pos
-                        size: self.size
-                        radius: [12]
-=======
     BoxLayout:
         orientation: "vertical"
         spacing: dp(10)
@@ -149,4 +99,3 @@
                 Button:
                     text: "Previsualizar Venta"
                     on_release: root.previsualizar_venta()
->>>>>>> Stashed changes
