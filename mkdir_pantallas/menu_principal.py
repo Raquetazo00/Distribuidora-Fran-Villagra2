@@ -1,17 +1,37 @@
 from kivy.uix.boxlayout import BoxLayout
+from kivy.clock import Clock
+from datetime import datetime
+from kivy.metrics import dp
+from kivy.uix.label import Label
+from kivy.uix.button import Button
+from kivy.uix.popup import Popup
+from kivy.uix.scrollview import ScrollView
+
+# Alias usado en el código para abreviar BoxLayout
+Bx = BoxLayout
+
+def set_ejecutar_consulta(func):
+    """Configurar la función ejecutar_consulta desde main.py"""
+    global ejecutar_consulta
+    ejecutar_consulta = func
 
 class MenuPrincipalScreen(BoxLayout):
     """Pantalla principal para empleados y otros roles"""
 
-<<<<<<< Updated upstream
+
     def volver_al_login(self):
         """Volver a la pantalla de login"""
         from mkdir_pantallas.login import LoginScreen
         self.clear_widgets()
         self.add_widget(LoginScreen())
-=======
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        # Inicializaciones necesarias para evitar AttributeError
+        self._reloj_iniciado = False
+        self._evento_busqueda = None
+        self.hora_actual = ''
+
         if not self._reloj_iniciado:
             Clock.schedule_interval(self._actualizar_hora, 1)
             self._reloj_iniciado = True
@@ -297,6 +317,7 @@ class MenuPrincipalScreen(BoxLayout):
             auto_dismiss=False
         )
         popup.open()
+        
 
     # ---------------------------
     # Confirmar venta
@@ -329,4 +350,4 @@ class MenuPrincipalScreen(BoxLayout):
         from mkdir_pantallas.facturacion import FacturacionScreen
         self.clear_widgets()
         self.add_widget(FacturacionScreen())
->>>>>>> Stashed changes
+

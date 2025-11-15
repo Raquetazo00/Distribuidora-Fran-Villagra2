@@ -138,14 +138,9 @@ def cerrar_conexion(conexion):
 
 
 def ejecutar_consulta(consulta, parametros=None):
-<<<<<<< Updated upstream
-    """
-    Ejecuta una consulta SQL genérica
-=======
     """Ejecuta una consulta genérica y devuelve filas para SELECT o rowcount para DML.
 
     parametros debe ser una tupla o lista. Usa '?' como placeholder (compatible con sqlite).
->>>>>>> Stashed changes
     """
     conexion = conectar()
     if not conexion:
@@ -176,63 +171,33 @@ def ejecutar_consulta(consulta, parametros=None):
         cerrar_conexion(conexion)
 
 
-<<<<<<< Updated upstream
+# === Funciones extra para facturas_sc ===
 def obtener_productos():
-    """Obtiene todos los productos activos"""
-    conn = conectar()  # ✅ corregido (antes decía conexion())
-    if not conn:
-        print("No se pudo conectar a la base de datos")
+    """Devuelve lista de productos activos."""
+    consulta = "SELECT ProductoID, Nombre, Descripcion, Precio, Stock FROM Productos WHERE Activo = 1"
+    filas = ejecutar_consulta(consulta)
+    if not filas:
         return []
-
-    try:
-        cursor = conn.cursor()
-        cursor.execute("SELECT ProductoID, Nombre, Precio, Stock FROM Productos")
-        productos = cursor.fetchall()
-        return productos
-    except pyodbc.Error as error:
-        print(f"Error al obtener productos: {error}")
-        return []
-    finally:
-        conn.close()
-
+    # Retornar como lista de dicts
+    return [
+        {
+            "id": f[0],
+            "nombre": f[1],
+            "descripcion": f[2],
+            "precio": f[3],
+            "stock": f[4]
+        }
+        for f in filas
+    ]
 
 def descontar_stock(producto_id, cantidad):
-    """Descuenta stock de un producto"""
-    conn = conectar()
-    if not conn:
-        print("No se pudo conectar a la base de datos")
-        return
+    """Descuenta cantidad del stock del producto."""
+    consulta = "UPDATE Productos SET Stock = Stock - ? WHERE ProductoID = ? AND Stock >= ?"
+    return ejecutar_consulta(consulta, (cantidad, producto_id, cantidad))
 
-    try:
-        cursor = conn.cursor()
-        cursor.execute("""
-            UPDATE dbo.Productos
-            SET Stock = Stock - ?
-            WHERE ProductoID = ? AND Stock >= ?
-        """, (cantidad, producto_id, cantidad))
-        conn.commit()
-    except pyodbc.Error as error:
-        print(f"Error al descontar stock: {error}")
-        conn.rollback()
-    finally:
-        conn.close()
-
-
-# Prueba manual (solo si ejecutás este archivo directamente)
-if __name__ == "__main__":
-    conexion = conectar()
-    if conexion:
-        print("Conexión exitosa a SQL Server")
-        cerrar_conexion(conexion)
-
-    productos = obtener_productos()
-    for p in productos:
-        print(p)
-=======
 if __name__ == '__main__':
     # Prueba de conexión rápida
     conn = conectar()
     if conn:
         print(f"Conectado usando backend: {_BACKEND}")
         cerrar_conexion(conn)
->>>>>>> Stashed changes
