@@ -1,7 +1,7 @@
 from kivy.app import App
 from kivy.core.window import Window
 from kivy.lang import Builder
-from kivy.uix.screenmanager import ScreenManager
+from kivy.uix.screenmanager import ScreenManager, Screen
 import os, sys
 
 # ================================
@@ -24,7 +24,12 @@ if RUTA_PANTALLAS not in sys.path:
 # IMPORTAR PANTALLAS
 # ================================
 from mkdir_pantallas.login import LoginScreen
+from mkdir_pantallas.menu_principal import MenuPrincipalScreen
+from mkdir_pantallas.crear_usuario import CrearUsuarioScreen
+from mkdir_pantallas.panel_admin import PanelAdminScreen
 from mkdir_pantallas.facturacion import FacturacionScreen
+from mkdir_pantallas.facturas_sc import FacturasScreen
+from kivy.uix.screenmanager import Screen
 
 # Variable global para compartir la función de consulta con menú
 import mkdir_database.conexion as conexion_module
@@ -81,8 +86,24 @@ class DistribuidoraApp(App):
         from mkdir_pantallas.menu_principal import set_ejecutar_consulta
         set_ejecutar_consulta(conexion_module.ejecutar_consulta)
 
-        # Agregar pantallas
+        # Agregar pantallas en el orden requerido
         sm.add_widget(LoginScreen(name="login"))
+        sm.add_widget(MenuPrincipalScreen(name="menu"))
+
+        # Pantallas adicionales
+        screens = [
+            ("crear_usuario", CrearUsuarioScreen),
+            ("panel_admin", PanelAdminScreen),
+            ("factura", FacturacionScreen),
+            ("facturas_sc", FacturasScreen)
+        ]
+        for screen_name, screen_cls in screens:
+            try:
+                s = Screen(name=screen_name)
+                s.add_widget(screen_cls())
+                sm.add_widget(s)
+            except Exception as e:
+                print(f"Aviso: no se pudo inicializar {screen_name}: {e}")
 
         # Establecer pantalla inicial (login)
         sm.current = "login"

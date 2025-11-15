@@ -170,6 +170,31 @@ def ejecutar_consulta(consulta, parametros=None):
     finally:
         cerrar_conexion(conexion)
 
+
+# === Funciones extra para facturas_sc ===
+def obtener_productos():
+    """Devuelve lista de productos activos."""
+    consulta = "SELECT ProductoID, Nombre, Descripcion, Precio, Stock FROM Productos WHERE Activo = 1"
+    filas = ejecutar_consulta(consulta)
+    if not filas:
+        return []
+    # Retornar como lista de dicts
+    return [
+        {
+            "id": f[0],
+            "nombre": f[1],
+            "descripcion": f[2],
+            "precio": f[3],
+            "stock": f[4]
+        }
+        for f in filas
+    ]
+
+def descontar_stock(producto_id, cantidad):
+    """Descuenta cantidad del stock del producto."""
+    consulta = "UPDATE Productos SET Stock = Stock - ? WHERE ProductoID = ? AND Stock >= ?"
+    return ejecutar_consulta(consulta, (cantidad, producto_id, cantidad))
+
 if __name__ == '__main__':
     # Prueba de conexión rápida
     conn = conectar()
