@@ -1,18 +1,4 @@
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.label import Label
-from kivy.uix.button import Button
-from kivy.uix.textinput import TextInput
-from kivy.uix.popup import Popup
-from kivy.uix.scrollview import ScrollView
-from kivy.core.window import Window
-from kivy.clock import Clock
-from datetime import datetime
-from kivy.metrics import dp
-
-Bx = BoxLayout
-
-# Variable global para la función de consulta (será configurada por main.py)
-ejecutar_consulta = None
 
 def set_ejecutar_consulta(func):
     """Configurar la función ejecutar_consulta desde main.py"""
@@ -22,9 +8,13 @@ def set_ejecutar_consulta(func):
 class MenuPrincipalScreen(BoxLayout):
     """Pantalla principal para empleados y otros roles"""
 
-    _reloj_iniciado = False
-    _evento_busqueda = None
-
+<<<<<<< Updated upstream
+    def volver_al_login(self):
+        """Volver a la pantalla de login"""
+        from mkdir_pantallas.login import LoginScreen
+        self.clear_widgets()
+        self.add_widget(LoginScreen())
+=======
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         if not self._reloj_iniciado:
@@ -344,9 +334,4 @@ class MenuPrincipalScreen(BoxLayout):
         from mkdir_pantallas.facturacion import FacturacionScreen
         self.clear_widgets()
         self.add_widget(FacturacionScreen())
-
-    def confirmar_salida(self):
-        """Volver a la pantalla de login"""
-        from mkdir_pantallas.login import LoginScreen
-        self.clear_widgets()
-        self.add_widget(LoginScreen())
+>>>>>>> Stashed changes
