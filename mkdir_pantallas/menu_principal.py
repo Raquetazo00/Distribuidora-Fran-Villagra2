@@ -14,6 +14,11 @@ Bx = BoxLayout
 # Variable global para la función de consulta (será configurada por main.py)
 ejecutar_consulta = None
 
+def set_ejecutar_consulta(func):
+    """Configurar la función ejecutar_consulta desde main.py"""
+    global ejecutar_consulta
+    ejecutar_consulta = func
+
 class MenuPrincipalScreen(BoxLayout):
     """Pantalla principal para empleados y otros roles"""
 

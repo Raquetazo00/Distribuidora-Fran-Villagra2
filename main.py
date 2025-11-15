@@ -23,9 +23,11 @@ if RUTA_PANTALLAS not in sys.path:
 # ================================
 # IMPORTAR PANTALLAS
 # ================================
-from login import LoginScreen
-from mkdir_pantallas.facturas_sc import FacturaScreen
+from mkdir_pantallas.login import LoginScreen
+from mkdir_pantallas.facturacion import FacturacionScreen
 
+# Variable global para compartir la función de consulta con menú
+import mkdir_database.conexion as conexion_module
 
 # ================================
 # GESTOR DE PANTALLAS
@@ -44,53 +46,45 @@ class DistribuidoraApp(App):
         self.text_color = (0.1, 0.1, 0.1, 1)
 
     def build(self):
-<<<<<<< Updated upstream
         sm = WindowManager()
 
-        # Cargar archivos .kv
-        kv_files = [
-=======
-        base_path = ruta_pantallas
         # Color de tipografía global (RGBA). Cambia estos valores si quieres otro color.
         # Ejemplo: (0,0,0,1) negro, (1,1,1,1) blanco, (0.1,0.1,0.1,1) gris oscuro
         self.text_color = (0.1, 0.1, 0.1, 1)
 
         # Cargar estilos globales primero
-        styles_kv = os.path.join(base_path, 'styles.kv')
+        styles_kv = os.path.join(RUTA_PANTALLAS, 'styles.kv')
         if os.path.exists(styles_kv):
             Builder.load_file(styles_kv)
             print(f"Archivo de estilos cargado: {styles_kv}")
         else:
             print(f"Aviso: no se encontró styles.kv en: {styles_kv}")
+
         # Cargar todos los .kv
-        for kv_file in [
->>>>>>> Stashed changes
+        kv_files = [
             'login_sc.kv',
             'crear_usuario.kv',
             'menu_principal.kv',
             'panel_admin.kv',
-<<<<<<< Updated upstream
-            'facturas_sc.kv'
+            'facturacion.kv'
         ]
+        
         for kv_file in kv_files:
             kv_path = os.path.join(RUTA_PANTALLAS, kv_file)
-            print("Buscando:", kv_path)
-=======
-            'facturacion.kv'
-        ]:
-            kv_path = os.path.join(base_path, kv_file)
->>>>>>> Stashed changes
             if os.path.exists(kv_path):
                 Builder.load_file(kv_path)
-                print(f"✅ Archivo .kv cargado: {kv_path}")
+                print(f"Archivo .kv cargado: {kv_path}")
             else:
-                print(f"⚠️ No se encontró el archivo .kv: {kv_path}")
+                print(f"Aviso: No se encontró el archivo .kv: {kv_path}")
+
+        # Configurar la función de consulta global para menu_principal.py
+        from mkdir_pantallas.menu_principal import set_ejecutar_consulta
+        set_ejecutar_consulta(conexion_module.ejecutar_consulta)
 
         # Agregar pantallas
         sm.add_widget(LoginScreen(name="login"))
-        sm.add_widget(FacturaScreen(name="factura"))
 
-        # 🟢 Establecer pantalla inicial (login)
+        # Establecer pantalla inicial (login)
         sm.current = "login"
 
         return sm
