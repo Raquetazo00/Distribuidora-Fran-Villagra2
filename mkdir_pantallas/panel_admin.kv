@@ -89,3 +89,21 @@
                         pos: self.pos
                         size: self.size
                         radius: [12]
+
+            # ---------------------------
+            # Botón: Volver al Menú Principal (añadido)
+            # ---------------------------
+            Button:
+                text: "Volver al Menú Principal"
+                size_hint: (0.4, None)
+                height: dp(45)
+                pos_hint: {"center_x": 0.5}
+                font_size: dp(16)
+                on_release: root.volver_al_menu()
+                canvas.before:
+                    Color:
+                        rgba: 0.2, 0.8, 0.2, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [12]

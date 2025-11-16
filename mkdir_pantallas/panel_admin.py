@@ -28,3 +28,11 @@ class PanelAdminScreen(BoxLayout):
         root = app.root
         root.clear_widgets()
         root.add_widget(LoginScreen())
+
+    def volver_al_menu(self):
+        """Volver al Menú Principal"""
+        from mkdir_pantallas.menu_principal import MenuPrincipalScreen
+        app = App.get_running_app()
+        root = app.root
+        root.clear_widgets()
+        root.add_widget(MenuPrincipalScreen())

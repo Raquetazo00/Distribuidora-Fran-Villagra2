@@ -6,10 +6,9 @@ from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout as Bx
 from kivy.uix.button import Button
 from kivy.metrics import dp
-from kivy.uix.popup import Popup  # Popup para confirmaciones
-from kivy.uix.scrollview import ScrollView  # <-- agregado para la tabla desplazable
+from kivy.uix.popup import Popup
+from kivy.uix.scrollview import ScrollView
 
-# Intentamos importar la conexión SQL
 try:
     from mkdir_database.conexion import ejecutar_consulta
 except Exception:
@@ -32,6 +31,18 @@ class MenuPrincipalScreen(BoxLayout):
         self.carrito = []
         self.cantidades = {}
         self.stock_productos = {}
+
+    def volver_al_login(self):
+        """Volver a la pantalla de login"""
+        from mkdir_pantallas.login import LoginScreen
+        self.clear_widgets()
+        self.add_widget(LoginScreen())
+
+    def ir_a_facturacion(self):
+        """Navega a la pantalla de facturación"""
+        from mkdir_pantallas.facturacion import FacturacionScreen
+        self.clear_widgets()
+        self.add_widget(FacturacionScreen())
 
     # ---------------------------
     # Reloj
@@ -65,10 +76,11 @@ class MenuPrincipalScreen(BoxLayout):
 
         try:
             consulta = """
-                SELECT TOP 50 ProductoID, Nombre, Descripcion, Precio, Stock
+                SELECT ProductoID, Nombre, Descripcion, Precio, Stock
                 FROM Productos
                 WHERE Nombre LIKE ? OR CodigoBarras LIKE ?
                 ORDER BY Nombre
+                LIMIT 50
             """
             param = f"%{texto}%"
             filas = ejecutar_consulta(consulta, (param, param))
@@ -131,7 +143,7 @@ class MenuPrincipalScreen(BoxLayout):
         botones = Bx(size_hint_y=None, height=dp(40), spacing=dp(10))
         btn_si = Button(
             text="Sí", background_color=(0.8, 0.1, 0.1, 1), color=(1, 1, 1, 1),
-            on_release=lambda x: self._confirmar_si(producto, popup)
+            on_release=lambda x, p=producto: self._confirmar_si(p, popup)
         )
         btn_no = Button(
             text="No", background_color=(0.3, 0.3, 0.3, 1), color=(1, 1, 1, 1),
@@ -164,166 +176,3 @@ class MenuPrincipalScreen(BoxLayout):
         if pid in self.cantidades:
             del self.cantidades[pid]
         self.actualizar_tabla_carrito()
-
-    # ---------------------------
-    # Incrementar / Decrementar cantidad (respetando stock)
-    # ---------------------------
-    def inc_cantidad(self, pid):
-        stock_max = self.stock_productos.get(pid, 0)
-        actual = self.cantidades.get(pid, 1)
-        if actual < stock_max:
-            self.cantidades[pid] = actual + 1
-            self.actualizar_tabla_carrito()
-
-    def dec_cantidad(self, pid):
-        actual = self.cantidades.get(pid, 1)
-        if actual > 1:
-            self.cantidades[pid] = actual - 1
-            self.actualizar_tabla_carrito()
-
-    # ---------------------------
-    # Actualizar tabla carrito
-    # ---------------------------
-    def actualizar_tabla_carrito(self):
-        contenedor = self.ids.tabla_carrito
-        contenedor.clear_widgets()
-        total = 0
-
-        if not self.carrito:
-            contenedor.add_widget(Label(text="No hay productos agregados", color=(1, 1, 1, 1)))
-            self.ids.lbl_total.text = "Total: $0.00"
-            return
-
-        for producto in self.carrito:
-            pid, nombre, desc, precio, stock = producto
-            qty = self.cantidades.get(pid, 1)
-            stock_disp = self.stock_productos.get(pid, 0)
-
-            fila = Bx(size_hint_y=None, height=dp(35), spacing=dp(10))
-            fila.add_widget(Label(text=str(pid), color=(0, 0, 0, 1)))
-            fila.add_widget(Label(text=nombre, color=(0, 0, 0, 1)))
-
-            cont = Bx(size_hint_x=None, width=dp(140), spacing=dp(4))
-            btn_menos = Button(
-                text="-", size_hint_x=None, width=dp(40),
-                background_color=(0.9, 0.2, 0.2, 1), color=(1, 1, 1, 1),
-                on_release=lambda x, _pid=pid: self.dec_cantidad(_pid)
-            )
-            lbl_qty = Label(text=f"{qty}/{stock_disp}", size_hint_x=None, width=dp(60), color=(0, 0, 0, 1))
-            btn_mas = Button(
-                text="+", size_hint_x=None, width=dp(40),
-                background_color=(0.1, 0.7, 0.6, 1), color=(1, 1, 1, 1),
-                on_release=lambda x, _pid=pid: self.inc_cantidad(_pid)
-            )
-            cont.add_widget(btn_menos)
-            cont.add_widget(lbl_qty)
-            cont.add_widget(btn_mas)
-            fila.add_widget(cont)
-
-            fila.add_widget(Label(text=f"${float(precio) * qty:.2f}", color=(0, 0, 0, 1)))
-
-            btn_quitar = Button(
-                text="Eliminar", size_hint_x=None, width=dp(100),
-                background_color=(0.8, 0.1, 0.1, 1), color=(1, 1, 1, 1),
-                on_release=lambda x, p=producto: self.confirmar_eliminar(p)
-            )
-            fila.add_widget(btn_quitar)
-
-            contenedor.add_widget(fila)
-            total += float(precio) * qty
-
-        self.ids.lbl_total.text = f"Total: ${total:.2f}"
-
-    # ---------------------------
-    # Previsualizar venta (tabla con scroll)
-    # ---------------------------
-    def previsualizar_venta(self):
-        """Muestra un resumen visual de los productos antes de confirmar."""
-        if not self.carrito:
-            popup = Popup(
-                title="Sin productos",
-                content=Label(text="No hay productos en la venta actual.", color=(1, 1, 1, 1)),
-                size_hint=(None, None),
-                size=(350, 150)
-            )
-            popup.open()
-            return
-
-        resumen = Bx(orientation="vertical", spacing=dp(10), padding=dp(10))
-        resumen.add_widget(Label(text="Resumen de Venta", font_size=dp(22), bold=True, color=(1, 1, 1, 1)))
-
-        # Encabezado
-        encabezado = Bx(size_hint_y=None, height=dp(25), spacing=dp(5))
-        encabezado.add_widget(Label(text="Producto", bold=True, color=(1, 1, 1, 1)))
-        encabezado.add_widget(Label(text="Cant.", bold=True, color=(1, 1, 1, 1), size_hint_x=None, width=dp(50)))
-        encabezado.add_widget(Label(text="Precio", bold=True, color=(1, 1, 1, 1), size_hint_x=None, width=dp(80)))
-        encabezado.add_widget(Label(text="Subtotal", bold=True, color=(1, 1, 1, 1), size_hint_x=None, width=dp(100)))
-        resumen.add_widget(encabezado)
-
-        # Scroll con productos
-        scroll = ScrollView(size_hint=(1, 1))
-        lista_productos = Bx(orientation="vertical", size_hint_y=None, spacing=dp(5))
-        lista_productos.bind(minimum_height=lista_productos.setter("height"))
-
-        total_general = 0
-        for producto in self.carrito:
-            pid, nombre, desc, precio, stock = producto
-            cantidad = self.cantidades.get(pid, 1)
-            subtotal = float(precio) * cantidad
-            total_general += subtotal
-
-            fila = Bx(size_hint_y=None, height=dp(25))
-            fila.add_widget(Label(text=nombre, color=(1, 1, 1, 1)))
-            fila.add_widget(Label(text=f"x{cantidad}", color=(1, 1, 1, 1), size_hint_x=None, width=dp(50)))
-            fila.add_widget(Label(text=f"${float(precio):.2f}", color=(1, 1, 1, 1), size_hint_x=None, width=dp(80)))
-            fila.add_widget(Label(text=f"${subtotal:.2f}", color=(1, 1, 1, 1), size_hint_x=None, width=dp(100)))
-            lista_productos.add_widget(fila)
-
-        scroll.add_widget(lista_productos)
-        resumen.add_widget(scroll)
-
-        # Total general
-        resumen.add_widget(Label(
-            text=f"TOTAL GENERAL: ${total_general:.2f}",
-            font_size=dp(20), bold=True, color=(1, 1, 1, 1)
-        ))
-
-        # Botones
-        botones = Bx(size_hint_y=None, height=dp(45), spacing=dp(10))
-        btn_confirmar = Button(
-            text="Confirmar Venta", background_color=(0.1, 0.6, 0.3, 1),
-            color=(1, 1, 1, 1), on_release=lambda x: self.confirmar_venta(popup)
-        )
-        btn_cancelar = Button(
-            text="Cancelar", background_color=(0.6, 0.1, 0.1, 1),
-            color=(1, 1, 1, 1), on_release=lambda x: popup.dismiss()
-        )
-        botones.add_widget(btn_confirmar)
-        botones.add_widget(btn_cancelar)
-        resumen.add_widget(botones)
-
-        popup = Popup(
-            title="Previsualización de Venta",
-            content=resumen,
-            size_hint=(None, None),
-            size=(600, 500),
-            auto_dismiss=False
-        )
-        popup.open()
-
-    # ---------------------------
-    # Confirmar venta
-    # ---------------------------
-    def confirmar_venta(self, popup):
-        popup.dismiss()
-        self.carrito.clear()
-        self.cantidades.clear()
-        self.actualizar_tabla_carrito()
-
-        confirm_popup = Popup(
-            title="Venta confirmada",
-            content=Label(text="La venta se ha confirmado exitosamente.", color=(1, 1, 1, 1)),
-            size_hint=(None, None),
-            size=(350, 150)
-        )
-        confirm_popup.open()
