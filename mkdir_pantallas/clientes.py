@@ -16,14 +16,24 @@ except:
 
 
 class ClientesScreen(BoxLayout):
+    pantalla_factura = None
+    class ClientesScreen(BoxLayout):
+        pantalla_factura = None
 
     # ------------------------------------------------
     # VOLVER AL MENÚ PRINCIPAL
     # ------------------------------------------------
     def volver_menu(self):
-        from mkdir_pantallas.menu_principal import MenuPrincipalScreen
-        self.clear_widgets()
-        self.add_widget(MenuPrincipalScreen())
+        if self.parent:
+            parent = self.parent
+            parent.remove_widget(self)
+
+            if self.pantalla_factura:
+                parent.add_widget(self.pantalla_factura)
+            else:
+                print("⚠ Error: pantalla de facturación no fue asignada.")
+
+
 
     # ------------------------------------------------
     # CARGAR CLIENTES (con o sin búsqueda)

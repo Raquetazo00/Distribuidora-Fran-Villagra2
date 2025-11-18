@@ -25,7 +25,9 @@ class DistribuidoraApp(App):
             'crear_usuario.kv',
             'menu_principal.kv',
             'panel_admin.kv',
-            'facturacion.kv'
+            'facturacion.kv',
+            'ventas_admin.kv',
+            'detalle_venta.kv',
         ]:
             kv_path = os.path.join(base_path, kv_file)
             if os.path.exists(kv_path):

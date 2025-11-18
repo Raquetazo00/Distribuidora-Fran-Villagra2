@@ -1,7 +1,6 @@
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 
-
 class PanelAdminScreen(BoxLayout):
     """Pantalla de administración para el rol Administrador"""
 
@@ -28,3 +27,14 @@ class PanelAdminScreen(BoxLayout):
         root = app.root
         root.clear_widgets()
         root.add_widget(LoginScreen())
+
+    # ======================================================
+    # NUEVA FUNCIÓN → VER VENTAS / FACTURAS
+    # ======================================================
+    def ir_a_ver_ventas(self):
+        """Ir a la pantalla donde se listan las ventas/facturas"""
+        from mkdir_pantallas.ventas_admin import VentasAdminScreen
+        app = App.get_running_app()
+        root = app.root
+        root.clear_widgets()
+        root.add_widget(VentasAdminScreen())

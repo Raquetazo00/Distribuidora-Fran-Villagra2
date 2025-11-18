@@ -14,9 +14,26 @@
         spacing: dp(20)
         padding: dp(25)
 
-        # ====================================
-        # TITULO PRINCIPAL
-        # ====================================
+        # =====================================================
+        #   BOTÓN VOLVER (arriba a la derecha)
+        # =====================================================
+        BoxLayout:
+            size_hint_y: None
+            height: dp(40)
+
+            Widget:
+
+            Button:
+                text: "< Volver"
+                size_hint: None, None
+                size: dp(120), dp(35)
+                background_color: 0.1, 0.2, 0.35, 1
+                color: 1,1,1,1
+                on_release: root.volver_menu()
+
+        # =====================================================
+        # TÍTULO
+        # =====================================================
         Label:
             text: "Facturación"
             font_size: dp(34)
@@ -25,9 +42,9 @@
             size_hint_y: None
             height: dp(50)
 
-        # ====================================
+        # =====================================================
         # TIPO DE FACTURA
-        # ====================================
+        # =====================================================
         BoxLayout:
             size_hint_y: None
             height: dp(60)
@@ -49,9 +66,9 @@
 
             Widget:
 
-        # ====================================
-        # DATOS DEL CLIENTE
-        # ====================================
+        # =====================================================
+        # SECCIÓN DATOS DEL CLIENTE
+        # =====================================================
         Label:
             text: "Datos del Cliente"
             font_size: dp(22)
@@ -59,6 +76,32 @@
             size_hint_y: None
             height: dp(40)
             color: 0.12, 0.12, 0.12, 1
+
+        # --- BOTONES DE CLIENTES ---
+        BoxLayout:
+            size_hint_y: None
+            height: dp(45)
+            spacing: dp(10)
+
+            Button:
+                text: "Clientes"
+                size_hint_x: None
+                width: dp(120)
+                background_color: 0.1, 0.3, 0.6, 1
+                color: 1,1,1,1
+                font_size: dp(16)
+                on_release: root.abrir_gestion_clientes()
+
+            Button:
+                text: "Seleccionar Cliente"
+                size_hint_x: None
+                width: dp(170)
+                background_color: 0.2, 0.6, 0.9, 1
+                color: 1,1,1,1
+                font_size: dp(16)
+                on_release: root.abrir_selector_cliente()
+
+            Widget:
 
         GridLayout:
             cols: 4
@@ -69,12 +112,11 @@
             TextInput:
                 id: cliente_nombre
                 hint_text: "Nombre"
-            TextInput:
-                id: cliente_apellido
-                hint_text: "Apellido"
+
             TextInput:
                 id: cliente_telefono
                 hint_text: "Teléfono"
+
             TextInput:
                 id: cliente_email
                 hint_text: "Email"
@@ -85,17 +127,17 @@
             size_hint_y: None
             height: dp(45)
 
-        # ====================================
-        # DOS COLUMNAS PRINCIPALES
-        # ====================================
+        # =====================================================
+        # DOS COLUMNAS PRINCIPALES (Productos + Carrito)
+        # =====================================================
         BoxLayout:
             orientation: "horizontal"
             spacing: dp(25)
             size_hint_y: 1
 
-            # ------------------------------------
-            # IZQUIERDA – AGREGAR PRODUCTOS
-            # ------------------------------------
+            # ----------------------------
+            #      IZQUIERDA – PRODUCTOS
+            # ----------------------------
             BoxLayout:
                 orientation: "vertical"
                 spacing: dp(15)
@@ -143,11 +185,12 @@
                         size_hint_x: .7
                         font_size: dp(17)
                         background_color: 0.15, 0.45, 0.7, 1
+                        color: 1,1,1,1
                         on_release: root._agregar_wrapper()
 
-            # ------------------------------------
-            # DERECHA – CARRITO
-            # ------------------------------------
+            # ----------------------------
+            #     DERECHA – CARRITO
+            # ----------------------------
             BoxLayout:
                 orientation: "vertical"
                 spacing: dp(15)
@@ -188,10 +231,12 @@
                         text: "Vaciar Carrito"
                         font_size: dp(17)
                         background_color: 0.7, 0.2, 0.2, 1
+                        color: 1,1,1,1
                         on_release: root.limpiar_carrito()
 
                     Button:
                         text: "Generar Factura"
                         font_size: dp(17)
                         background_color: 0.15, 0.6, 0.25, 1
+                        color: 1,1,1,1
                         on_release: root._generar_wrapper()
