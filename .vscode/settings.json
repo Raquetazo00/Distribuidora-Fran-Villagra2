@@ -1,6 +1,0 @@
-{
-    "python.analysis.extraPaths": [
-        "./mkdir_database",
-        "./mkdir_pantallas"
-    ]
-}

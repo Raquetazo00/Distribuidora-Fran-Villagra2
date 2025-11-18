@@ -1,28 +1,27 @@
-from kivy.uix.screenmanager import Screen
-from kivy.properties import ObjectProperty
+from kivy.uix.boxlayout import BoxLayout
+import sys
+import os
 import hashlib
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from mkdir_database.conexion import ejecutar_consulta
 
-
-class LoginScreen(Screen):
-    """Pantalla de inicio de sesión"""
+class LoginScreen(BoxLayout):
+    """Pantalla de login"""
 
     def validar_login(self, usuario, password):
         if not usuario or not password:
             self.mostrar_mensaje("Por favor, complete todos los campos", error=True)
             return False
 
-        # Hash de la contraseña
         password_hash = hashlib.sha256(password.encode()).hexdigest()
 
-        # Consulta SQL compatible con SQLite
         consulta = """
             SELECT u.UsuarioID, u.NombreUsuario, u.RolID, r.Nombre as RolNombre, u.EmpleadoID
             FROM Usuarios u
-            JOIN Roles r ON u.RolID = r.RolID
+            INNER JOIN Roles r ON u.RolID = r.RolID
             WHERE u.NombreUsuario = ? AND u.ClaveHash = ? AND u.Estado = 1
         """
-
         resultado = ejecutar_consulta(consulta, (usuario, password_hash))
 
         if resultado and len(resultado) > 0:
@@ -34,31 +33,26 @@ class LoginScreen(Screen):
                 'EmpleadoID': resultado[0][4]
             }
 
-            print(f"✅ Usuario autenticado: {usuario_data}")
-            self.mostrar_mensaje(f"Bienvenido {usuario_data['NombreUsuario']}", error=False)
+            print(f"Usuario autenticado: {usuario_data}")
 
-            # Cambiar de pantalla según el rol
             rol = usuario_data['RolNombre'].lower()
-
-            if rol == "administrador":
-                self.manager.current = "admin"         # PANEL ADMIN
-            elif rol == "empleado":
-                self.manager.current = "menu_principal"
-            elif rol == "vendedor":
-                self.manager.current = "menu_principal"
+            if rol == 'administrador':
+                from mkdir_pantallas.panel_admin import PanelAdminScreen
+                self.clear_widgets()
+                self.add_widget(PanelAdminScreen())
             else:
-                self.manager.current = "menu_principal"
+                from mkdir_pantallas.menu_principal import MenuPrincipalScreen
+                self.clear_widgets()
+                self.add_widget(MenuPrincipalScreen())
 
+            self.mostrar_mensaje(f"Bienvenido {usuario_data['NombreUsuario']}", error=False)
             return True
-
         else:
             self.mostrar_mensaje("Usuario o contraseña incorrectos", error=True)
             return False
 
     def mostrar_mensaje(self, mensaje, error=True):
-        """Muestra mensajes en etiqueta del KV"""
         if hasattr(self, 'ids') and 'mensaje_label' in self.ids:
             mensaje_label = self.ids.mensaje_label
             mensaje_label.text = mensaje
             mensaje_label.color = (1, 0, 0, 1) if error else (0, 1, 0, 1)
-            print(f"Mensaje mostrado: {mensaje}")
