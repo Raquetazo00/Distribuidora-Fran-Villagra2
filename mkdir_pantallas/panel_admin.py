@@ -1,38 +1,27 @@
-from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.screenmanager import Screen
 
+class PanelAdminScreen(Screen):
+    """
+    Pantalla del Panel Administrador
+    Controlada completamente por ScreenManager
+    """
 
-class PanelAdminScreen(BoxLayout):
-    """Pantalla de administración para el rol Administrador"""
+    # ============================
+    # NAVEGACIÓN ENTRE PANTALLAS
+    # ============================
 
     def ir_a_crear_usuario(self):
-        """Ir a la pantalla para crear usuarios"""
-        from mkdir_pantallas.crear_usuario import CrearUsuarioScreen
-        app = App.get_running_app()
-        root = app.root
-        root.clear_widgets()
-        root.add_widget(CrearUsuarioScreen())
+        """Ir a la pantalla de creación de usuarios"""
+        self.manager.current = "crear_usuario"
 
     def ir_a_agregar_producto(self):
-        """Ir a la pantalla de gestión de productos"""
-        from mkdir_pantallas.agregar_producto import AgregarProductoScreen
-        app = App.get_running_app()
-        root = app.root
-        root.clear_widgets()
-        root.add_widget(AgregarProductoScreen())
+        """Ir a la pantalla de agregar/editar productos"""
+        self.manager.current = "agregar_producto"
 
     def volver_al_login(self):
-        """Volver a la pantalla de login"""
-        from mkdir_pantallas.login import LoginScreen
-        app = App.get_running_app()
-        root = app.root
-        root.clear_widgets()
-        root.add_widget(LoginScreen())
+        """Volver a Login"""
+        self.manager.current = "login"
 
     def volver_al_menu(self):
-        """Volver al Menú Principal"""
-        from mkdir_pantallas.menu_principal import MenuPrincipalScreen
-        app = App.get_running_app()
-        root = app.root
-        root.clear_widgets()
-        root.add_widget(MenuPrincipalScreen())
+        """Volver al menú principal"""
+        self.manager.current = "menu_principal"

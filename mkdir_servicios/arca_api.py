@@ -1,48 +1,38 @@
-from afip import Afip
-from kivy import key
-from datetime import date
+# arca_api.py - versión simulada para desarrollo sin PyAfipWs
 
-from afip import Afip
+from datetime import datetime
+import random
 
-afip = Afip({
-    "CUIT": 20409378472,
-    "access_token": "PJR0t4Tl9IuhETgDNxXqdBDm4yPD2rQE69mrZn8aysBfHAEm8Rtsgxnq2annGcbA",
-    "production": False  # cambia a True cuando pases a producción
-})
+def emitir_factura_simple(cliente, productos, usuario_id):
+    """
+    Simula la emisión de una factura AFIP.
+    Devuelve un diccionario con los datos como si se hubiera emitido correctamente.
+    
+    Args:
+        cliente: dict con 'nombre', 'ci', 'telefono', 'email'
+        productos: lista de dicts {'producto_id', 'nombre', 'cantidad', 'precio'}
+        usuario_id: ID del usuario que genera la factura
+    """
+    # Simular número de factura
+    numero_factura = f"F{random.randint(1000,9999)}-{random.randint(10000000,99999999)}"
+    cae = f"{random.randint(10000000000000,99999999999999)}"
+    vto_cae = (datetime.now().replace(microsecond=0)).isoformat()
 
-def emitir_factura_simple(data):
-    print("factura emitida con exito")
-    return {"status":"ok"}
+    total = sum(p['cantidad'] * p['precio'] for p in productos)
 
-def emitir_factura():
-    # 👉 Datos del comprobante
-    data = {
-        "CantReg": 1,
-        "PtoVta": 1,
-        "CbteTipo": 6,  # 6 = Factura B (podés usar 1 para A)
-        "Concepto": 1,  # 1 = Productos, 2 = Servicios, 3 = Ambos
-        "DocTipo": 80,  # 80 = CUIT, 96 = DNI, 99 = sin identificar
-        "DocNro": 20123456789,  # CUIT del cliente
-        "CbteFch": afip.format_date(datetime.date.today()),
-
-        # ⚠️ Campo obligatorio desde RG 5616
-        "IvaCondicionReceptor": 4,  # 4 = Consumidor Final (por ejemplo)
-
-        "ImpTotal": 1000.00,
-        "ImpNeto": 826.45,
-        "ImpIVA": 173.55,
-        "MonId": "PES",
-        "MonCotiz": 1,
-        "Iva": [
-            {
-                "Id": 5,        # 21%
-                "BaseImp": 826.45,
-                "Importe": 173.55
-            }
-        ],
+    factura_simulada = {
+        "numero_factura": numero_factura,
+        "fecha_factura": datetime.now().isoformat(),
+        "cliente_nombre": cliente.get('nombre'),
+        "cliente_ci": cliente.get('ci'),
+        "cliente_telefono": cliente.get('telefono'),
+        "cliente_email": cliente.get('email'),
+        "total": total,
+        "usuario_id": usuario_id,
+        "cae": cae,
+        "vto_cae": vto_cae,
+        "estado": "completada"
     }
 
-    # 👉 Crear la factura
-    factura = afip.ElectronicBilling.create_next_voucher(data)
-
-    print("Factura creada correctamente:", factura)
+    print("⚡ Factura simulada generada:", factura_simulada)
+    return factura_simulada
