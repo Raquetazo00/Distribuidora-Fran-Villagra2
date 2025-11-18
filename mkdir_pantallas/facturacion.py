@@ -5,47 +5,59 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
+from kivy.clock import Clock
 
 import sys, os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from mkdir_database.conexion import ejecutar_consulta
+
+try:
+    from mkdir_database.conexion import ejecutar_consulta
+except:
+    from conexion import ejecutar_consulta
 
 
 class FacturaScreen(Screen):
-
     total_carrito = NumericProperty(0.0)
     cantidad_items = NumericProperty(0)
-    carrito = ListProperty([])
-    productos_disponibles = ListProperty([])
+    carrito = ListProperty([])               # [{'id', 'nombre', 'precio', 'cantidad', 'subtotal'}, ...]
+    productos_disponibles = ListProperty([]) # [{'id', 'nombre', 'precio'}, ...]
 
-    # ==========================================================
-    # AL ENTRAR A LA PANTALLA
-    # ==========================================================
     def on_pre_enter(self, *args):
-        # Aseguramos que exista el atributo de selección
+        # Para evitar errores si se llama muy temprano
         self._producto_seleccionado = None
-        # Si ya hay carrito (viene del menú principal), lo pintamos
         try:
-            self.actualizar_tabla_carrito()
+            Clock.schedule_once(lambda dt: self.actualizar_tabla_carrito(), 0)
         except Exception as e:
             print("Error al actualizar tabla carrito en on_pre_enter:", e)
 
     # ==========================================================
-    # VOLVER AL MENÚ
+    # VOLVER AL MENÚ (si usás ScreenManager)
     # ==========================================================
     def volver_menu(self):
-        self.manager.current = "menu_principal"
+        if self.manager:
+            self.manager.current = "menu_principal"
 
     # ==========================================================
-    # RECIBIR CARRITO DESDE MENÚ PRINCIPAL
+    # RECIBIR CARRITO DESDE MENÚ PRINCIPAL (LUCAS)
     # ==========================================================
     def set_carrito_inicial(self, carrito):
+        """
+        carrito: lista de dicts con:
+        {
+          "id": ProductoID,
+          "nombre": str,
+          "precio": float,
+          "cantidad": int,
+          "subtotal": float
+        }
+        """
         self.carrito = carrito
         self.actualizar_totales()
-        self.actualizar_tabla_carrito()
+        # Esperamos 1 frame para asegurar que el kv cargó los ids
+        Clock.schedule_once(lambda dt: self.actualizar_tabla_carrito(), 0)
 
     # ==========================================================
-    # WRAPPER PARA AGREGAR (DESDE EL KV)
+    # WRAPPER PARA AGREGAR DESDE EL KV
     # ==========================================================
     def _agregar_wrapper(self):
         cantidad = self.ids.cantidad_producto.text.strip()
@@ -58,9 +70,10 @@ class FacturaScreen(Screen):
             self.mostrar_error("Cantidad inválida.")
             return
 
-        # Agregar usando el producto seleccionado
         self.agregar_producto_factura(
+            self._producto_seleccionado["id"],
             self._producto_seleccionado["nombre"],
+            self._producto_seleccionado["precio"],
             cantidad
         )
 
@@ -73,34 +86,35 @@ class FacturaScreen(Screen):
     # ==========================================================
     # AGREGAR PRODUCTO AL CARRITO
     # ==========================================================
-    def agregar_producto_factura(self, nombre_producto, cantidad_txt):
+    def agregar_producto_factura(self, producto_id, nombre_producto, precio_unitario, cantidad_txt):
         if not cantidad_txt.isdigit() or int(cantidad_txt) <= 0:
             self.mostrar_error("Cantidad inválida.")
             return
 
         cantidad = int(cantidad_txt)
+        precio = float(precio_unitario)
+        subtotal = precio * cantidad
 
-        # buscar producto en la lista disponible
-        for p in self.productos_disponibles:
-            if p["nombre"] == nombre_producto:
-                producto = {
-                    "id": p["id"],
-                    "nombre": p["nombre"],
-                    "precio": float(p["precio"]),
-                    "cantidad": cantidad,
-                    "subtotal": float(p["precio"]) * cantidad
-                }
+        # Si ya existe en el carrito, sumamos cantidad
+        for item in self.carrito:
+            if item["id"] == producto_id:
+                item["cantidad"] += cantidad
+                item["subtotal"] += subtotal
                 break
         else:
-            self.mostrar_error("Producto no encontrado.")
-            return
+            self.carrito.append({
+                "id": producto_id,
+                "nombre": nombre_producto,
+                "precio": precio,
+                "cantidad": cantidad,
+                "subtotal": subtotal
+            })
 
-        self.carrito.append(producto)
         self.actualizar_totales()
         self.actualizar_tabla_carrito()
 
     # ==========================================================
-    # BUSCADOR DE PRODUCTOS (BARRA DE BÚSQUEDA)
+    # BUSCADOR DE PRODUCTOS (EN MEMORIA)
     # ==========================================================
     def buscar_producto_factura(self, texto):
         cont = self.ids.resultados_busqueda
@@ -110,7 +124,6 @@ class FacturaScreen(Screen):
         if not texto:
             return
 
-        # Filtrar productos por nombre (en memoria)
         resultados = [
             p for p in self.productos_disponibles
             if texto.lower() in p["nombre"].lower()
@@ -139,8 +152,19 @@ class FacturaScreen(Screen):
     # TABLA CARRITO
     # ==========================================================
     def actualizar_tabla_carrito(self):
+        if "carrito_grid" not in self.ids:
+            # Aún no está cargado el kv
+            return
+
         tabla = self.ids.carrito_grid
         tabla.clear_widgets()
+
+        if not self.carrito:
+            # Solo encabezados vacíos
+            encabezados = ["Producto", "Precio", "Cantidad", "Subtotal", "Acción"]
+            for titulo in encabezados:
+                tabla.add_widget(Label(text=titulo, bold=True, size_hint_y=None, height=dp(30)))
+            return
 
         # Encabezados
         encabezados = ["Producto", "Precio", "Cantidad", "Subtotal", "Acción"]
@@ -149,10 +173,10 @@ class FacturaScreen(Screen):
 
         # Filas
         for item in self.carrito:
-            tabla.add_widget(Label(text=item["nombre"]))
-            tabla.add_widget(Label(text=f"${item['precio']:.2f}"))
-            tabla.add_widget(Label(text=str(item["cantidad"])))
-            tabla.add_widget(Label(text=f"${item['subtotal']:.2f}"))
+            tabla.add_widget(Label(text=item["nombre"], color=(0, 0, 0, 1)))
+            tabla.add_widget(Label(text=f"${item['precio']:.2f}", color=(0, 0, 0, 1)))
+            tabla.add_widget(Label(text=str(item["cantidad"]), color=(0, 0, 0, 1)))
+            tabla.add_widget(Label(text=f"${item['subtotal']:.2f}", color=(0, 0, 0, 1)))
 
             btn = Button(
                 text="X",
@@ -192,8 +216,9 @@ class FacturaScreen(Screen):
 
     # ==========================================================
     # GUARDAR FACTURA EN LA BD
+    #   → Usa Compradores + Ventas + VentaDetalle (SQL Server)
     # ==========================================================
-    def generar_factura(self, nombre, apellido, telefono, email, ci):
+    def generar_factura(self, nombre, apellido, telefono, email, ci_rut):
 
         if not self.carrito:
             self.mostrar_error("El carrito está vacío.")
@@ -203,39 +228,63 @@ class FacturaScreen(Screen):
             self.mostrar_error("Nombre y apellido son obligatorios.")
             return
 
-        # Insert cliente
-        consulta_cliente = """
-            INSERT INTO Clientes (Nombre, Apellido, Telefono, Email, CI)
-            VALUES (?, ?, ?, ?, ?)
-        """
-        ejecutar_consulta(consulta_cliente, (nombre, apellido, telefono, email, ci))
+        nombre_completo = f"{nombre} {apellido}".strip()
 
-        cliente_id = ejecutar_consulta("SELECT last_insert_rowid()")[0][0]
-
-        # Insert factura
-        consulta_factura = """
-            INSERT INTO Facturas (ClienteID, Total, Fecha)
-            VALUES (?, ?, datetime('now'))
-        """
-        ejecutar_consulta(consulta_factura, (cliente_id, self.total_carrito))
-
-        factura_id = ejecutar_consulta("SELECT last_insert_rowid()")[0][0]
-
-        # Insert detalles + actualizar stock
-        for item in self.carrito:
+        # 1) Insertar en Compradores
+        try:
             ejecutar_consulta("""
-                INSERT INTO FacturaDetalle 
-                (FacturaID, ProductoID, Cantidad, PrecioUnitario, Subtotal)
-                VALUES (?, ?, ?, ?, ?)
-            """, (factura_id, item["id"], item["cantidad"], item["precio"], item["subtotal"]))
+                INSERT INTO Compradores (Nombre, TipoComprador, Telefono, Email, Direccion, Estado)
+                VALUES (?, ?, ?, ?, ?, 1)
+            """, (nombre_completo, "Minorista", telefono or "", email or "", ci_rut or ""))
 
+            filas = ejecutar_consulta("SELECT MAX(CompradorID) FROM Compradores", ())
+            comprador_id = filas[0][0] if filas and filas[0][0] is not None else None
+        except Exception as e:
+            self.mostrar_error(f"Error al guardar comprador: {e}")
+            return
+
+        if not comprador_id:
+            self.mostrar_error("No se pudo obtener el CompradorID.")
+            return
+
+        # 2) Insertar en Ventas
+        try:
+            tipo_pago = "Sin especificar"
             ejecutar_consulta("""
-                UPDATE Productos SET Stock = Stock - ?
-                WHERE ProductoID = ?
-            """, (item["cantidad"], item["id"]))
+                INSERT INTO Ventas (CompradorID, TipoPago, Total)
+                VALUES (?, ?, ?)
+            """, (comprador_id, tipo_pago, self.total_carrito))
 
+            filas = ejecutar_consulta("SELECT MAX(VentaID) FROM Ventas", ())
+            venta_id = filas[0][0] if filas and filas[0][0] is not None else None
+        except Exception as e:
+            self.mostrar_error(f"Error al guardar venta: {e}")
+            return
+
+        if not venta_id:
+            self.mostrar_error("No se pudo obtener el VentaID.")
+            return
+
+        # 3) Insertar detalles + actualizar stock
+        try:
+            for item in self.carrito:
+                ejecutar_consulta("""
+                    INSERT INTO VentaDetalle (VentaID, ProductoID, Cantidad, PrecioUnitario, Descuento)
+                    VALUES (?, ?, ?, ?, 0)
+                """, (venta_id, item["id"], item["cantidad"], item["precio"]))
+
+                ejecutar_consulta("""
+                    UPDATE Productos
+                    SET Stock = Stock - ?
+                    WHERE ProductoID = ?
+                """, (item["cantidad"], item["id"]))
+        except Exception as e:
+            self.mostrar_error(f"Error al guardar detalle de venta: {e}")
+            return
+
+        # 4) Limpiar
         self.limpiar_carrito()
-        self.mostrar_mensaje("Factura generada con éxito")
+        self.mostrar_mensaje(f"Venta registrada con éxito. VentaID: {venta_id}")
 
     # ==========================================================
     # POPUPS
@@ -271,5 +320,5 @@ class FacturaScreen(Screen):
             self.ids.cliente_apellido.text,
             self.ids.cliente_telefono.text,
             self.ids.cliente_email.text,
-            self.ids.cliente_ci.text
+            self.ids.cliente_ci.text,
         )

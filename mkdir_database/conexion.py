@@ -1,184 +1,71 @@
-"""Módulo de conexión para SQLite.
-
-Comportamiento:
-- Usa exclusivamente SQLite (archivo local `data/distribuidora.db`).
-- Crea las tablas automáticamente si no existen.
-
-Funciones exportadas:
-- conectar() -> conexión SQLite o None
-- cerrar_conexion(conexion)
-- ejecutar_consulta(consulta, parametros=None) -> lista de filas (SELECT) o rowcount (DML)
-"""
-
-import os
-import sqlite3
-import traceback
-from pathlib import Path
-
-# Configuración SQLite
-_SQLITE_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'distribuidora.db')
-_BACKEND = 'sqlite'
-
-
-def _ensure_sqlite_db():
-    """Asegura que exista el directorio y crea el esquema mínimo si es necesario."""
-    db_path = Path(_SQLITE_DB_PATH)
-    db_path.parent.mkdir(parents=True, exist_ok=True)
-
-    conn = sqlite3.connect(str(db_path))
-    try:
-        cur = conn.cursor()
-        # Crear tablas mínimas si no existen
-        cur.execute("""
-        CREATE TABLE IF NOT EXISTS Roles (
-            RolID INTEGER PRIMARY KEY AUTOINCREMENT,
-            Nombre TEXT NOT NULL
-        )
-        """)
-
-        cur.execute("""
-        CREATE TABLE IF NOT EXISTS Permisos (
-            PermisoID INTEGER PRIMARY KEY AUTOINCREMENT,
-            Nombre TEXT NOT NULL,
-            Descripcion TEXT,
-            Modulo TEXT
-        )
-        """)
-
-        cur.execute("""
-        CREATE TABLE IF NOT EXISTS Usuarios (
-            UsuarioID INTEGER PRIMARY KEY AUTOINCREMENT,
-            NombreUsuario TEXT NOT NULL,
-            ClaveHash TEXT NOT NULL,
-            RolID INTEGER,
-            EmpleadoID INTEGER,
-            Estado INTEGER NOT NULL DEFAULT 1
-        )
-        """)
-
-        cur.execute("""
-        CREATE TABLE IF NOT EXISTS RolPermisos (
-            RolPermisoID INTEGER PRIMARY KEY AUTOINCREMENT,
-            RolID INTEGER NOT NULL,
-            PermisoID INTEGER NOT NULL
-        )
-        """)
-
-        cur.execute("""
-        CREATE TABLE IF NOT EXISTS Productos (
-            ProductoID INTEGER PRIMARY KEY AUTOINCREMENT,
-            Nombre TEXT NOT NULL,
-            Descripcion TEXT,
-            Precio REAL NOT NULL,
-            Stock INTEGER NOT NULL DEFAULT 0,
-            CodigoBarras TEXT,
-            Activo INTEGER NOT NULL DEFAULT 1
-        )
-        """)
-
-        cur.execute("""
-        CREATE TABLE IF NOT EXISTS Facturas (
-            FacturaID INTEGER PRIMARY KEY AUTOINCREMENT,
-            NumeroFactura TEXT NOT NULL UNIQUE,
-            FechaFactura DATETIME NOT NULL,
-            ClienteNombre TEXT NOT NULL,
-            ClienteCI TEXT,
-            ClienteTelefono TEXT,
-            ClienteEmail TEXT,
-            Total REAL NOT NULL,
-            UsuarioID INTEGER,
-            CAE TEXT,
-            VtoCae TEXT,
-            Estado TEXT NOT NULL DEFAULT 'completada'
-        )
-        """)
-
-        cur.execute("""
-        CREATE TABLE IF NOT EXISTS DetallesFactura (
-            DetalleID INTEGER PRIMARY KEY AUTOINCREMENT,
-            FacturaID INTEGER NOT NULL,
-            ProductoID INTEGER NOT NULL,
-            Cantidad INTEGER NOT NULL,
-            PrecioUnitario REAL NOT NULL,
-            Subtotal REAL NOT NULL,
-            FOREIGN KEY (FacturaID) REFERENCES Facturas(FacturaID),
-            FOREIGN KEY (ProductoID) REFERENCES Productos(ProductoID)
-        )
-        """)
-
-        conn.commit()
-    finally:
-        conn.close()
-
+import pyodbc
 
 def conectar():
-    """Devuelve una conexión al SQLite. Retorna None si falla."""
+    """Establece conexión con SQL Server"""
     try:
-        _ensure_sqlite_db()
-        conn = sqlite3.connect(str(Path(_SQLITE_DB_PATH)))
-        return conn
+        conexion = pyodbc.connect(
+            'DRIVER={ODBC Driver 17 for SQL Server};'
+            'SERVER=localhost\\SQLEXPRESS;'
+            'DATABASE=Distribuidora;'
+            'Trusted_Connection=yes;'
+        )
+        return conexion
+    except pyodbc.Error as error:
+        print(f"Error al conectar con SQL Server: {error}")
+        return None
     except Exception as error:
-        print(f"Error al conectar con SQLite: {error}")
-        traceback.print_exc()
+        print(f"Error inesperado: {error}")
         return None
 
-
 def cerrar_conexion(conexion):
-    """Cierra la conexión (sqlite3)."""
-    try:
-        if conexion:
-            conexion.close()
-    except Exception:
-        pass
-
+    """Cierra la conexión"""
+    if conexion:
+        conexion.close()
+        print("Conexión cerrada")
 
 def ejecutar_consulta(consulta, parametros=None):
-    """Ejecuta una consulta genérica y devuelve filas para SELECT o rowcount para DML."""
+    """
+    Ejecuta una consulta SQL genérica
+    
+    Args:
+        consulta: Consulta SQL a ejecutar
+        parametros: Tupla o lista de parámetros (opcional)
+    
+    Returns:
+        Resultados de la consulta si es SELECT, o número de filas afectadas
+    """
     conexion = conectar()
     if not conexion:
         return None
-
+    
     try:
-        cur = conexion.cursor()
+        cursor = conexion.cursor()
         if parametros:
-            cur.execute(consulta, parametros)
+            cursor.execute(consulta, parametros)
         else:
-            cur.execute(consulta)
-
+            cursor.execute(consulta)
+        
         if consulta.strip().upper().startswith('SELECT'):
-            resultados = cur.fetchall()
+            resultados = cursor.fetchall()
             return resultados
         else:
             conexion.commit()
-            return cur.rowcount
-    except Exception as error:
+            return cursor.rowcount
+    except pyodbc.Error as error:
         print(f"Error al ejecutar consulta: {error}")
-        try:
-            conexion.rollback()
-        except Exception:
-            pass
-        traceback.print_exc()
+        conexion.rollback()
         return None
     finally:
         cerrar_conexion(conexion)
 
-
-if __name__ == '__main__':
-    # Prueba de conexión rápida
-    conn = conectar()
-    if conn:
-        print(f"Conectado usando backend: {_BACKEND}")
-        cerrar_conexion(conn)
-
-
-def obtener_productos():
-    """Devuelve todos los productos activos"""
-    consulta = "SELECT ProductoID, Nombre, Descripcion, Precio, Stock FROM Productos WHERE Activo=1"
-    resultados = ejecutar_consulta(consulta)
-    return resultados or []
-
-
-def descontar_stock(producto_id, cantidad):
-    """Descuenta stock de un producto"""
-    consulta = "UPDATE Productos SET Stock = Stock - ? WHERE ProductoID = ? AND Stock >= ?"
-    ejecutar_consulta(consulta, (cantidad, producto_id, cantidad))
+# Ejemplo de uso
+if __name__ == "__main__":
+    # Prueba la conexión
+    conexion = conectar()
+    if conexion:
+        print("Conexión exitosa a SQL Server")
+        cerrar_conexion(conexion)
+    
+    # Ejemplo de consulta
+    # resultados = ejecutar_consulta("SELECT * FROM Usuarios")
+    # print(resultados)

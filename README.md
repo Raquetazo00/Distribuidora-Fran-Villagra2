@@ -1,77 +1,53 @@
-# Sistema de Distribuidora - Guía de Uso
+# Sistema de Distribuidora
 
-Sistema de gestión para distribuidora desarrollado con **Python**, **Kivy** y **SQLite**.
+Sistema de gestión para distribuidora desarrollado con Python, Kivy y SQL Server.
 
-## ✅ Estado del Sistema
+## 📋 Requisitos del Sistema
 
-**¡Completamente funcional y listo para usar!**
+### Software Requerido
 
-Características implementadas:
-- ✅ Autenticación de usuarios
-- ✅ Búsqueda de productos en tiempo real
-- ✅ Carrito de compras con cantidades
-- ✅ Transferencia de productos menú → facturación
-- ✅ Datos del cliente (nombre, apellido, teléfono, email, C.I.)
-- ✅ Generación de facturas con BD SQLite
-- ✅ Integración AFIP (modo testing)
-- ✅ Sistema de validaciones
+1. **Python 3.13.7** o superior
+   - Descarga desde: https://www.python.org/downloads/
+   - Durante la instalación, marca la opción "Add Python to PATH"
 
----
+2. **SQL Server Express** (o superior)
+   - Descarga desde: https://www.microsoft.com/sql-server/sql-server-downloads
+   - Incluye SQL Server Management Studio (SSMS)
 
-## 🚀 Inicio Rápido
+3. **ODBC Driver para SQL Server**
+   - Descarga desde: https://learn.microsoft.com/sql/connect/odbc/download-odbc-driver-for-sql-server
+   - Necesario para la conexión con pyodbc
 
-### 1. Requisitos Previos
+## 🚀 Instalación
 
-```bash
-# Python 3.13.7 o superior
-python --version
+### 1. Clonar o descargar el repositorio
 
-# Instalar dependencias
+git clone <url-del-repositorio>
+cd Distribuidora-Fran-Villagra2### 2. Instalar dependencias de Python
+
+Abre PowerShell o CMD en la carpeta del proyecto y ejecuta:
+
+# Instalar Kivy (framework de interfaz gráfica)
 pip install kivy
-```
 
-### 2. Ejecutar la aplicación
+# Instalar pyodbc (conector para SQL Server)
+pip install pyodbc
 
-```bash
-python main.py
-```
+# O instalar todas las dependencias de una vez
+pip install kivy pyodbc**Nota:** Si tienes problemas con pyodbc, asegúrate de tener instalado el ODBC Driver para SQL Server.
 
-### 3. Credenciales de prueba
+### 3. Configurar SQL Server
 
-```
-Usuario: admin
-Contraseña: admin123
-```
+1. **Asegúrate de que SQL Server esté ejecutándose:**
+   - Abre "Servicios" en Windows
+   - Busca "SQL Server (SQLEXPRESS)" o el nombre de tu instancia
+   - Verifica que esté "En ejecución"
 
-O
-
-```
-Usuario: juan
-Contraseña: miPassword123
-```
-
----
-
-## 📖 Guía de Uso
-
-### Menú Principal
-1. **Buscar productos**: Escribe el nombre o código de barras
-2. **Agregar al carrito**: Haz clic en "Agregar"
-3. **Ajustar cantidades**: Usa botones +/-
-4. **Previsualizar**: Haz clic en "Previsualizar Venta"
-
-### Facturación
-1. **Datos del cliente**: 
-   - Nombre (requerido)
-   - Apellido (requerido)
-   - Teléfono (requerido)
-   - Email (requerido, debe tener @)
-   - C.I./RUT (requerido)
-
-2. **Generar factura**: Haz clic en "Generar Factura"
-   - Se guardará en la BD SQLite
-   - Se mostrará el número de factura generado
-   - Incluye CAE (en testing: "12345678901234")
+2. **Crear la base de datos:**
+   - Abre SQL Server Management Studio (SSMS)
+   - Conéctate a tu servidor (ej: `DESKTOP-1RNSV4J\SQLEXPRESS`)
+   - Ejecuta el script SQL que crea la base de datos `DistribuidoraDB`
+   - Ejecuta el script que crea todas las tablas
 
 3. **Configurar permisos:**
    - Ejecuta el script SQL para crear la tabla de Permisos y RolPermisos
@@ -85,178 +61,70 @@ ython
 'DATABASE=DistribuidoraDB;'            # Nombre de tu base de datos
 'Trusted_Connection=yes;'               # O usa usuario/contraseña**Si usas autenticación de SQL Server en lugar de Windows:**n
 'UID=tu_usuario;'
-'PWD=tu_contraseña;'
+'PWD=tu_contraseña;'## 📦 Dependencias de Python
 
----
+El proyecto requiere las siguientes librerías:
 
-## 📦 Dependencias
+- **kivy** (>=2.3.0) - Framework para interfaces gráficas
+- **pyodbc** (>=5.0.0) - Conector ODBC para SQL Server
 
-### Instaladas y Funcionando
-```
-kivy>=2.3.0          # UI Framework
-sqlite3              # Base de datos (built-in)
-hashlib              # SHA256 (built-in)
-datetime             # Timestamps (built-in)
-```
+### Instalación con requirements.txt (recomendado)
 
-### Instalar
-```bash
-pip install kivy
-```
-
----
-
-## 🗄️ Base de Datos
-
-### Ubicación
-```
-data/distribuidora.db
-```
-
-### Tablas principales
-- **Usuarios**: Cuentas de login
-- **Roles**: Admin, Empleado
-- **Permisos**: Control de acceso
-- **Productos**: Catálogo
-- **Facturas**: Histórico de ventas
-- **DetallesFactura**: Líneas de facturas
-
-### Campos de Cliente (Facturas)
-- ClienteNombre
-- ClienteCI
-- **ClienteTelefono** (Nuevo)
-- **ClienteEmail** (Nuevo)
-- Total
-- CAE (AFIP)
-- VtoCae (Vencimiento AFIP)
-
----
-
-## 🔧 Troubleshooting
-
-### "Error al conectar con la BD"
-```bash
-# Regenerar BD
-python scripts/create_distribuidora_db.py
-```
-
-### Productos no aparecen
-- Prueba con búsquedas exactas: "Producto A"
-- Verifica stock > 0
-
-### Limpiar caché Kivy
-```bash
-Remove-Item -Path "$env:USERPROFILE\.kivy" -Recurse -Force
-python main.py
-```
-
----
-
-## 🧪 Testing
-
-Ejecutar tests de integración:
-```bash
-python test_afip_integration.py
-```
-
-Verifica:
-- ✅ Importación módulos
-- ✅ Esquema BD
-- ✅ Campos CAE/VtoCae
-- ✅ Integración facturación
-
----
-
-## 🔐 Seguridad
-
-- Contraseñas: SHA256 hash
-- BD local: Sin credenciales SQL Server
-- Validaciones: Todos los inputs
-- AFIP modo testing (sin conexión real)
-
----
-
-## 📋 Estructura de Archivos
+Crea un archivo `requirements.txt` con el siguiente contenido:
 
 ```
-.
-├── main.py                    # Punto de entrada
-├── App.kv                     # Config UI global
-│
-├── mkdir_database/
-│   ├── conexion.py           # SQLite
-│   ├── afip_wsfe.py          # AFIP (testing)
-│   ├── permisos.py           # Sistema permisos
-│   └── verificar_usuarios.py # Auth
-│
-├── mkdir_pantallas/
-│   ├── login*                # Login
-│   ├── menu_principal*       # Menú
-│   ├── facturacion*          # Facturas
-│   ├── panel_admin*          # Admin
-│   ├── styles.kv             # Estilos
-│   └── crear_usuario*        # Usuarios
-│
-├── scripts/
-│   └── create_distribuidora_db.py  # Init BD
-│
-├── data/
-│   └── distribuidora.db      # SQLite
-│
-├── certificados/             # AFIP producción (futuro)
-│   ├── cert.crt
-│   └── key.key
-│
-├── AFIP_SETUP.md            # AFIP docs
-└── test_afip_integration.py # Tests
+kivy>=2.3.0
+pyodbc>=5.0.0
 ```
 
----
+### 2. Instalar dependencias de Python
+
+Abre PowerShell o CMD en la carpeta del proyecto y ejecuta:
+
+
+**Nota:** Si tienes problemas con pyodbc, asegúrate de tener instalado el ODBC Driver para SQL Server.
+
+### 3. Configurar SQL Server
+
+1. **Asegúrate de que SQL Server esté ejecutándose:**
+   - Abre "Servicios" en Windows
+   - Busca "SQL Server (SQLEXPRESS)" o el nombre de tu instancia
+   - Verifica que esté "En ejecución"
+
+2. **Crear la base de datos:**
+   - Abre SQL Server Management Studio (SSMS)
+   - Conéctate a tu servidor (ej: `DESKTOP-1RNSV4J\SQLEXPRESS`)
+   - Ejecuta el script SQL que crea la base de datos `DistribuidoraDB`
+   - Ejecuta el script que crea todas las tablas
+
+3. **Configurar permisos:**
+   - Ejecuta el script SQL para crear la tabla de Permisos y RolPermisos
+   - Asigna los permisos a los roles correspondientes
+
+### 4. Configurar la conexión
+
+Edita el archivo `mkdir_database/conexion.py` y ajusta los siguientes parámetros:
+ython
+'SERVER=DESKTOP-1RNSV4J\\SQLEXPRESS;'  # Cambia por tu servidor
+'DATABASE=DistribuidoraDB;'            # Nombre de tu base de datos
+'Trusted_Connection=yes;'               # O usa usuario/contraseña
+cación de Windows** por defecto. Si usas autenticación de SQL Server, cambia `Trusted_Connection=yes` por `UID` y `PWD`.
+- Las contraseñas se almacenan con hash SHA256 en la base de datos.
+- El sistema requiere que existan roles y permisos en la base de datos antes de iniciar sesión.
+
+## 👥 Roles del Sistema
+
+Los roles disponibles son:
+- **Administrador**: Acceso completo al sistema
+- **Vendedor**: Puede ver y crear ventas
+- **Almacenista**: Gestiona inventario y compras
+- **Gerente**: Acceso a reportes y configuración
+
+## 📄 Licencia
+
+[Especificar licencia si aplica]
 
 ## 👨‍💻 Desarrollo
-
-### Para extender:
-1. Edita archivos `.kv` para UI
-2. Edita archivos `.py` para lógica
-3. Ejecuta `python main.py` para probar
-
-### Para agregar productos:
-```bash
-# Edita create_distribuidora_db.py
-python scripts/create_distribuidora_db.py
-```
-
----
-
-## 📞 Notas Importantes
-
-- **AFIP**: Actualmente en modo testing (CAE simulado)
-- **Certificados**: Para producción, coloca en `certificados/`
-- **pyafipws**: Tiene issue en Windows, funciona sin él
-- **SQLite**: No requiere servidor externo
-- **Base de datos**: Se crea automáticamente en primera ejecución
-
----
-
-## ✅ Checklist de Funcionalidades
-
-- [x] Login con autenticación
-- [x] Búsqueda de productos
-- [x] Carrito de compras
-- [x] Transferencia menú → facturación
-- [x] Datos cliente (nombre, apellido, teléfono, email)
-- [x] Generación de facturas
-- [x] BD SQLite
-- [x] CAE (testing)
-- [x] Validaciones completas
-- [x] Sistema de estilos
-
----
-
-**Versión**: 1.0 Stable  
-**Base de datos**: SQLite (incluyendo certificados para AFIP futuro)  
-**Estado**: ✅ Listo para producción (testing mode)
-
 
 Para contribuir al proyecto:
 1. Fork el repositorio

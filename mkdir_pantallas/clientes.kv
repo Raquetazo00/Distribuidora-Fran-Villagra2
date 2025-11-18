@@ -1,0 +1,77 @@
+<ClientesScreen>:
+    orientation: "vertical"
+    padding: dp(20)
+    spacing: dp(10)
+
+    # --------------------
+    # CABECERA CON SALIR
+    # --------------------
+    BoxLayout:
+        size_hint_y: None
+        height: dp(45)
+
+        Label:
+            text: "Gestión de Clientes"
+            font_size: dp(24)
+            bold: True
+            color: 0,0,0,1
+
+        Button:
+            text: "Salir"
+            size_hint: None, None
+            size: dp(80), dp(35)
+            on_release: root.volver_menu()
+            color: 1,1,1,1
+            canvas.before:
+                Color:
+                    rgba: 0.9, 0.2, 0.2, 1
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [8]
+
+    # ------------------------
+    # BARRA DE BÚSQUEDA
+    # ------------------------
+    BoxLayout:
+        size_hint_y: None
+        height: dp(45)
+        spacing: dp(10)
+
+        TextInput:
+            id: input_busqueda
+            hint_text: "Buscar cliente por nombre o CUIT..."
+            multiline: False
+            on_text_validate: root.cargar_clientes(self.text)
+
+        Button:
+            text: "Buscar"
+            size_hint_x: None
+            width: dp(120)
+            background_color: 0.2, 0.6, 0.9, 1
+            color: 1, 1, 1, 1
+            on_release: root.cargar_clientes(input_busqueda.text)
+
+    # ------------------------
+    # NUEVO CLIENTE
+    # ------------------------
+    Button:
+        text: "Nuevo Cliente"
+        size_hint_y: None
+        height: dp(45)
+        background_color: 0.1, 0.5, 0.2, 1
+        color: 1, 1, 1, 1
+        on_release: root.abrir_popup_nuevo()
+
+    # ------------------------
+    # TABLA
+    # ------------------------
+    ScrollView:
+        size_hint_y: 1
+
+        BoxLayout:
+            id: tabla_clientes
+            orientation: "vertical"
+            size_hint_y: None
+            height: self.minimum_height
+            spacing: dp(4)

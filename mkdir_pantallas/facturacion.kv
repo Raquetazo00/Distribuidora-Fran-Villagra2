@@ -4,201 +4,194 @@
 
     canvas.before:
         Color:
-            rgba: 0.95, 0.95, 0.97, 1
+            rgba: 0.96, 0.96, 0.98, 1
         Rectangle:
             pos: self.pos
             size: self.size
 
     BoxLayout:
         orientation: "vertical"
-        spacing: dp(10)
-        padding: dp(10)
+        spacing: dp(20)
+        padding: dp(25)
 
         # ====================================
-        # TÍTULO CENTRADO ARRIBA
+        # TITULO PRINCIPAL
         # ====================================
-        AnchorLayout:
-            anchor_x: "center"
-            anchor_y: "top"
+        Label:
+            text: "Facturación"
+            font_size: dp(34)
+            bold: True
+            color: 0.15, 0.15, 0.15, 1
             size_hint_y: None
             height: dp(50)
 
+        # ====================================
+        # TIPO DE FACTURA
+        # ====================================
+        BoxLayout:
+            size_hint_y: None
+            height: dp(60)
+            spacing: dp(10)
+
             Label:
-                text: "Facturación"
-                font_size: dp(30)
+                text: "Tipo de Factura:"
                 bold: True
-                color: 0.2, 0.2, 0.2, 1
+                font_size: dp(18)
+                size_hint_x: 0.25
+                color: 0.15, 0.15, 0.15, 1
+
+            Spinner:
+                id: tipo_factura
+                text: "Factura A"
+                values: ["Factura A", "Factura B"]
+                size_hint_x: 0.35
+                font_size: dp(17)
+
+            Widget:
 
         # ====================================
-        # CONTENIDO SCROLLEABLE
+        # DATOS DEL CLIENTE
         # ====================================
-        ScrollView:
+        Label:
+            text: "Datos del Cliente"
+            font_size: dp(22)
+            bold: True
+            size_hint_y: None
+            height: dp(40)
+            color: 0.12, 0.12, 0.12, 1
+
+        GridLayout:
+            cols: 4
+            size_hint_y: None
+            height: dp(50)
+            spacing: dp(10)
+
+            TextInput:
+                id: cliente_nombre
+                hint_text: "Nombre"
+            TextInput:
+                id: cliente_apellido
+                hint_text: "Apellido"
+            TextInput:
+                id: cliente_telefono
+                hint_text: "Teléfono"
+            TextInput:
+                id: cliente_email
+                hint_text: "Email"
+
+        TextInput:
+            id: cliente_ci
+            hint_text: "C.I. / RUT"
+            size_hint_y: None
+            height: dp(45)
+
+        # ====================================
+        # DOS COLUMNAS PRINCIPALES
+        # ====================================
+        BoxLayout:
+            orientation: "horizontal"
+            spacing: dp(25)
             size_hint_y: 1
 
+            # ------------------------------------
+            # IZQUIERDA – AGREGAR PRODUCTOS
+            # ------------------------------------
             BoxLayout:
                 orientation: "vertical"
-                size_hint_y: None
-                height: self.minimum_height
                 spacing: dp(15)
-                padding: dp(10)
 
-                # ====================================
-                # TIPO DE FACTURA
-                # ====================================
+                Label:
+                    text: "Agregar productos"
+                    bold: True
+                    font_size: dp(20)
+                    size_hint_y: None
+                    height: dp(35)
+                    color: 0.12, 0.12, 0.12, 1
+
+                TextInput:
+                    id: buscar_producto
+                    hint_text: "Buscar producto..."
+                    size_hint_y: None
+                    height: dp(45)
+                    multiline: False
+                    on_text: root.buscar_producto_factura(self.text)
+
+                ScrollView:
+                    size_hint_y: 0.4
+                    bar_width: dp(8)
+
+                    BoxLayout:
+                        id: resultados_busqueda
+                        orientation: "vertical"
+                        size_hint_y: None
+                        height: self.minimum_height
+                        spacing: dp(6)
+
                 BoxLayout:
                     size_hint_y: None
                     height: dp(45)
                     spacing: dp(10)
 
-                    Label:
-                        text: "Tipo de Factura:"
-                        bold: True
-                        size_hint_x: 0.3
-                        color: 0.1, 0.1, 0.1, 1
+                    TextInput:
+                        id: cantidad_producto
+                        hint_text: "1"
+                        input_filter: "int"
+                        size_hint_x: .3
 
-                    Spinner:
-                        id: tipo_factura
-                        text: "Factura A"
-                        values: ["Factura A", "Factura B"]
-                        size_hint_x: 0.4
+                    Button:
+                        text: "Agregar"
+                        size_hint_x: .7
+                        font_size: dp(17)
+                        background_color: 0.15, 0.45, 0.7, 1
+                        on_release: root._agregar_wrapper()
 
-                # ====================================
-                # DATOS DEL CLIENTE
-                # ====================================
+            # ------------------------------------
+            # DERECHA – CARRITO
+            # ------------------------------------
+            BoxLayout:
+                orientation: "vertical"
+                spacing: dp(15)
+
                 Label:
-                    text: "Datos del Cliente"
+                    text: "Carrito de Compras"
+                    bold: True
+                    font_size: dp(20)
+                    size_hint_y: None
+                    height: dp(35)
+                    color: 0.12, 0.12, 0.12, 1
+
+                ScrollView:
+                    size_hint_y: 1
+                    bar_width: dp(8)
+
+                    GridLayout:
+                        id: carrito_grid
+                        cols: 5
+                        spacing: dp(10)
+                        size_hint_y: None
+                        height: self.minimum_height
+
+                Label:
+                    text: "Total: $" + str(root.total_carrito)
+                    font_size: dp(22)
                     bold: True
                     size_hint_y: None
-                    height: dp(30)
+                    height: dp(45)
                     color: 0.1, 0.1, 0.1, 1
 
                 BoxLayout:
                     size_hint_y: None
-                    height: dp(45)
-                    spacing: dp(10)
+                    height: dp(50)
+                    spacing: dp(12)
 
-                    TextInput:
-                        id: cliente_nombre
-                        hint_text: "Nombre"
+                    Button:
+                        text: "Vaciar Carrito"
+                        font_size: dp(17)
+                        background_color: 0.7, 0.2, 0.2, 1
+                        on_release: root.limpiar_carrito()
 
-                    TextInput:
-                        id: cliente_apellido
-                        hint_text: "Apellido"
-
-                    TextInput:
-                        id: cliente_telefono
-                        hint_text: "Teléfono"
-                        input_filter: "int"
-
-                    TextInput:
-                        id: cliente_email
-                        hint_text: "Email"
-
-                TextInput:
-                    id: cliente_ci
-                    hint_text: "C.I. / RUT"
-                    size_hint_y: None
-                    height: dp(40)
-
-                # ====================================
-                # SECCIÓN DOS COLUMNAS (IZQ: BUSCADOR / DER: CARRITO)
-                # ====================================
-                BoxLayout:
-                    orientation: "horizontal"
-                    spacing: dp(15)
-                    size_hint_y: None
-                    height: dp(350)
-
-                    # -------- IZQUIERDA: BUSCADOR Y AGREGAR --------
-                    BoxLayout:
-                        orientation: "vertical"
-                        spacing: dp(10)
-                        size_hint_x: 0.5
-
-                        Label:
-                            text: "Agregar productos"
-                            bold: True
-                            size_hint_y: None
-                            height: dp(30)
-
-                        # BARRA DE BÚSQUEDA
-                        TextInput:
-                            id: buscar_producto
-                            hint_text: "Buscar producto..."
-                            multiline: False
-                            size_hint_y: None
-                            height: dp(40)
-                            on_text: root.buscar_producto_factura(self.text)
-
-                        # RESULTADOS DE BÚSQUEDA
-                        ScrollView:
-                            size_hint_y: None
-                            height: dp(120)
-
-                            BoxLayout:
-                                id: resultados_busqueda
-                                orientation: "vertical"
-                                size_hint_y: None
-                                height: self.minimum_height
-                                spacing: dp(4)
-
-                        # CANTIDAD + BOTÓN AGREGAR
-                        BoxLayout:
-                            size_hint_y: None
-                            height: dp(40)
-                            spacing: dp(10)
-
-                            TextInput:
-                                id: cantidad_producto
-                                hint_text: "1"
-                                input_filter: "int"
-                                size_hint_x: .3
-
-                            Button:
-                                text: "Agregar"
-                                size_hint_x: .7
-                                on_release: root._agregar_wrapper()
-
-                    # -------- DERECHA: CARRITO + TOTAL + BOTONES --------
-                    BoxLayout:
-                        orientation: "vertical"
-                        spacing: dp(10)
-                        size_hint_x: 0.5
-
-                        Label:
-                            text: "Carrito de Compras"
-                            bold: True
-                            size_hint_y: None
-                            height: dp(30)
-
-                        ScrollView:
-                            size_hint_y: 1
-
-                            GridLayout:
-                                id: carrito_grid
-                                cols: 5
-                                spacing: dp(5)
-                                size_hint_y: None
-                                height: self.minimum_height
-                                padding: dp(5)
-
-                        Label:
-                            text: "Total: $" + str(root.total_carrito)
-                            font_size: dp(20)
-                            bold: True
-                            size_hint_y: None
-                            height: dp(35)
-                            color: 0, 0, 0, 1
-
-                        BoxLayout:
-                            size_hint_y: None
-                            height: dp(45)
-                            spacing: dp(10)
-
-                            Button:
-                                text: "Vaciar Carrito"
-                                on_release: root.limpiar_carrito()
-
-                            Button:
-                                text: "Generar Factura"
-                                on_release: root._generar_wrapper()
+                    Button:
+                        text: "Generar Factura"
+                        font_size: dp(17)
+                        background_color: 0.15, 0.6, 0.25, 1
+                        on_release: root._generar_wrapper()
