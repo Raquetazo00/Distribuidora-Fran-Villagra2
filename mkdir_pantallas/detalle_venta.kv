@@ -1,0 +1,171 @@
+<DetalleVentaScreen>:
+    orientation: "vertical"
+    padding: dp(30)
+    spacing: dp(20)
+
+    ScrollView:
+        do_scroll_x: False
+        do_scroll_y: True
+
+        BoxLayout:
+            orientation: "vertical"
+            size_hint_y: None
+            height: self.minimum_height
+            spacing: dp(20)
+
+            # ---------------------------
+            # ENCABEZADO
+            # ---------------------------
+            Label:
+                text: "FACTURA"
+                font_size: dp(40)
+                bold: True
+                halign: "center"
+                size_hint_y: None
+                height: dp(60)
+                color: 0, 0, 0, 1
+
+            Label:
+                text: "Distribuidora XYZ - CUIT 30-12345678-9\nDirección: Av. Principal 123 - Cel: 3815000000"
+                font_size: dp(18)
+                halign: "center"
+                size_hint_y: None
+                height: dp(60)
+                color: 0.2, 0.2, 0.2, 1
+
+            # ---------------------------
+            # DATOS DE FACTURA Y CLIENTE
+            # ---------------------------
+            GridLayout:
+                cols: 2
+                size_hint_y: None
+                height: dp(140)
+                spacing: dp(15)
+
+                # FACTURA
+                BoxLayout:
+                    orientation: "vertical"
+                    spacing: dp(5)
+
+                    Label:
+                        text: "Factura N°: " + root.factura_id
+                        font_size: dp(18)
+                        bold: True
+                        color: 0,0,0,1
+
+                    Label:
+                        text: "Fecha: " + root.fecha
+                        font_size: dp(16)
+                        color: 0.2,0.2,0.2,1
+
+                    Label:
+                        text: "Método: " + root.metodo
+                        font_size: dp(16)
+                        color: 0.2,0.2,0.2,1
+
+                    Label:
+                        text: "Total: $" + str(root.total)
+                        font_size: dp(20)
+                        bold: True
+                        color: 0,0.5,0,1
+
+                # CLIENTE
+                BoxLayout:
+                    orientation: "vertical"
+                    spacing: dp(5)
+
+                    Label:
+                        text: "Cliente:"
+                        bold: True
+                        font_size: dp(18)
+                        color: 0,0,0,1
+
+                    Label:
+                        text: root.cli_nombre
+                        font_size: dp(16)
+                        color: 0.2,0.2,0.2,1
+
+                    Label:
+                        text: "Tel: " + root.cli_tel
+                        font_size: dp(16)
+                        color: 0.2,0.2,0.2,1
+
+                    Label:
+                        text: "Email: " + root.cli_email
+                        font_size: dp(16)
+                        color: 0.2,0.2,0.2,1
+
+                    Label:
+                        text: "CUIT / CI: " + root.cli_cuit
+                        font_size: dp(16)
+                        color: 0.2,0.2,0.2,1
+
+            # ---------------------------
+            # TABLA DE PRODUCTOS
+            # ---------------------------
+            Label:
+                text: ""
+                height: dp(5)
+                size_hint_y: None
+
+            GridLayout:
+                cols: 4
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(10)
+
+                # ENCABEZADOS
+                Label:
+                    text: "Producto"
+                    bold: True
+                    font_size: dp(18)
+                    color: 0,0,0,1
+
+                Label:
+                    text: "Cant."
+                    bold: True
+                    halign: "center"
+                    font_size: dp(18)
+                    color: 0,0,0,1
+
+                Label:
+                    text: "Precio"
+                    bold: True
+                    halign: "center"
+                    font_size: dp(18)
+                    color: 0,0,0,1
+
+                Label:
+                    text: "Subtotal"
+                    bold: True
+                    halign: "right"
+                    font_size: dp(18)
+                    color: 0,0,0,1
+
+                # Aquí se insertan filas dinámicas desde Python
+                GridLayout:
+                    id: tabla_items
+                    cols: 4
+                    size_hint_y: None
+                    height: self.minimum_height
+                    spacing: dp(10)
+
+    # ---------------------------
+    # BOTONES
+    # ---------------------------
+    BoxLayout:
+        size_hint_y: None
+        height: dp(60)
+        spacing: dp(20)
+
+        Button:
+            text: "Generar PDF"
+            background_color: 0, 0.2, 0.4, 1
+            color: 1,1,1,1
+            on_release: root.generar_pdf()
+
+        Button:
+            text: "Volver"
+            background_color: 0.1, 0.1, 0.1, 1
+            color: 1,1,1,1
+            on_release: root.volver()

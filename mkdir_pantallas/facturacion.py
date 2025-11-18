@@ -224,8 +224,10 @@ class FacturaScreen(Screen):
             self.mostrar_error("El carrito está vacío.")
             return
 
-        if not nombre or not apellido:
-            self.mostrar_error("Nombre y apellido son obligatorios.")
+        # Validar cliente seleccionado
+        cliente_id = getattr(self, "cliente_id_seleccionado", None)
+        if not cliente_id:
+            self.mostrar_error("Debes seleccionar un cliente.")
             return
 
         nombre_completo = f"{nombre} {apellido}".strip()
@@ -251,15 +253,18 @@ class FacturaScreen(Screen):
         try:
             tipo_pago = "Sin especificar"
             ejecutar_consulta("""
-                INSERT INTO Ventas (CompradorID, TipoPago, Total)
+                INSERT INTO Ventas (ClienteID, TipoPago, Total)
                 VALUES (?, ?, ?)
-            """, (comprador_id, tipo_pago, self.total_carrito))
+            """, (cliente_id, tipo_pago, self.total_carrito))
 
             filas = ejecutar_consulta("SELECT MAX(VentaID) FROM Ventas", ())
             venta_id = filas[0][0] if filas and filas[0][0] is not None else None
+
         except Exception as e:
             self.mostrar_error(f"Error al guardar venta: {e}")
             return
+
+
 
         if not venta_id:
             self.mostrar_error("No se pudo obtener el VentaID.")
@@ -317,8 +322,149 @@ class FacturaScreen(Screen):
     def _generar_wrapper(self):
         self.generar_factura(
             self.ids.cliente_nombre.text,
-            self.ids.cliente_apellido.text,
+            "", 
             self.ids.cliente_telefono.text,
             self.ids.cliente_email.text,
             self.ids.cliente_ci.text,
         )
+
+
+    def volver_menu(self):
+        from mkdir_pantallas.menu_principal import MenuPrincipalScreen
+
+        contenedor = self.parent
+        if contenedor:
+            contenedor.clear_widgets()
+            contenedor.add_widget(MenuPrincipalScreen())
+
+        # ================================================================
+    # ABRIR PANTALLA DE GESTIÓN DE CLIENTES
+    # ================================================================
+    def abrir_gestion_clientes(self):
+        from mkdir_pantallas.clientes import ClientesScreen
+
+        clientes = ClientesScreen()
+        clientes.pantalla_factura = self  # ← Le pasamos la referencia
+
+        if self.parent:
+            contenedor = self.parent
+            contenedor.clear_widgets()
+            contenedor.add_widget(clientes)
+
+    # ================================================================
+    # ABRIR POPUP PARA SELECCIONAR CLIENTE
+    # ================================================================
+    def abrir_selector_cliente(self):
+        try:
+            filas = ejecutar_consulta("""
+                SELECT ClienteID, Nombre, Telefono, Email, CUIT
+                FROM Clientes
+            """, ())
+        except Exception as e:
+            print("Error al ejecutar consulta:", e)
+            filas = []
+
+        # Si filas viene vacío o None
+        if not filas:
+            Popup(
+                title="Sin clientes",
+                content=Label(text="No hay clientes registrados.", color=(1, 1, 1, 1)),
+                size_hint=(None, None),
+                size=(350, 150)
+            ).open()
+            return
+
+        # Crear lista para mostrar en el popup
+        opciones = []
+        for cid, nombre, tel, email, cuit in filas:
+            opciones.append(f"{cid} - {nombre}")
+
+        # ---------- Popup de selección ----------
+        content = BoxLayout(orientation="vertical", spacing=dp(10), padding=dp(10))
+
+        from kivy.uix.spinner import Spinner
+        selector = Spinner(
+            text="Seleccionar cliente...",
+            values=opciones,
+            size_hint_y=None,
+            height=dp(40)
+        )
+        content.add_widget(selector)
+
+        botones = BoxLayout(size_hint_y=None, height=dp(45), spacing=dp(10))
+
+        btn_ok = Button(
+            text="Seleccionar",
+            background_color=(0, 0.6, 0.2, 1),
+            color=(1, 1, 1, 1),
+            on_release=lambda x: self._cliente_seleccionado(selector.text, popup)
+        )
+
+        btn_cancel = Button(
+            text="Cancelar",
+            background_color=(0.6, 0.1, 0.1, 1),
+            color=(1, 1, 1, 1),
+            on_release=lambda x: popup.dismiss()
+        )
+
+        botones.add_widget(btn_ok)
+        botones.add_widget(btn_cancel)
+        content.add_widget(botones)
+
+        popup = Popup(
+            title="Seleccionar Cliente",
+            content=content,
+            size_hint=(None, None),
+            size=(450, 300),
+            auto_dismiss=False
+        )
+        popup.open()
+
+    def _cliente_seleccionado(self, texto, popup):
+        """
+        texto viene en formato: 'ID - Nombre'
+        ejemplo: '3 - Juan Perez'
+        """
+        if not texto or " - " not in texto:
+            popup.dismiss()
+            return
+
+        cliente_id = texto.split(" - ")[0]
+
+        self.cliente_id_seleccionado = int(cliente_id)
+
+        try:
+            fila = ejecutar_consulta("""
+                SELECT Nombre, Telefono, Email, CUIT
+                FROM Clientes
+                WHERE ClienteID = ?
+            """, (cliente_id,))
+        except Exception as e:
+            print("Error al obtener cliente:", e)
+            popup.dismiss()
+            return
+
+        if fila:
+            nombre, telefono, email, cuit = fila[0]
+
+            # Rellenar los campos del formulario
+            self.ids.cliente_nombre.text = nombre or ""
+            self.ids.cliente_telefono.text = telefono or ""
+            self.ids.cliente_email.text = email or ""
+            self.ids.cliente_ci.text = cuit or ""
+
+        popup.dismiss()
+
+    # ================================================================
+    # CARGAR CLIENTE EN FORMULARIO
+    # ================================================================
+    def cargar_cliente_en_formulario(self, cliente, popup):
+        cid, nom, ape, tel, email, ci = cliente
+
+        self.ids.cliente_nombre.text = nom
+        self.ids.cliente_apellido.text = ape
+        self.ids.cliente_telefono.text = tel
+        self.ids.cliente_email.text = email
+        self.ids.cliente_ci.text = ci
+
+        popup.dismiss()

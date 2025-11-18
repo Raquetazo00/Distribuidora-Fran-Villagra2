@@ -1,0 +1,44 @@
+<VentasAdminScreen>:
+    orientation: "vertical"
+    padding: dp(20)
+    spacing: dp(10)
+
+    Label:
+        text: "Ventas Registradas"
+        font_size: dp(32)
+        bold: True
+        color: 0, 0, 0, 1
+        size_hint_y: None
+        height: dp(60)
+
+    # -------------------
+    # BUSCADOR
+    # -------------------
+    TextInput:
+        id: txt_buscar
+        hint_text: "Buscar por ID, Fecha, Cliente o Total..."
+        size_hint_y: None
+        height: dp(45)
+        multiline: False
+        on_text: root.filtrar_busqueda(self.text)
+
+
+    ScrollView:
+        size_hint_y: 1
+
+        GridLayout:
+            id: tabla_ventas
+            cols: 6
+            row_default_height: dp(40)
+            spacing: dp(10)
+            padding: dp(10)
+            size_hint_y: None
+            height: self.minimum_height
+
+    Button:
+        text: "< Volver"
+        size_hint: (1, None)
+        height: dp(50)
+        background_color: 0.3, 0.3, 0.3, 1
+        color: 1, 1, 1, 1
+        on_release: root.volver()
