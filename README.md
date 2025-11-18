@@ -132,19 +132,6 @@ Para contribuir al proyecto:
 3. Realiza tus cambios
 4. Envía un pull request
 
-'UID=tu_usuario;'
-'PWD=tu_contraseña;'
-
-Distribuidora-Fran-Villagra2/
-├── main.py                          # Punto de entrada principal
-├── App.kv                           # Archivo KV principal (opcional)
-├── README.md                        # Este archivo
-├── mkdir_database/                  # Módulo de base de datos
-│   ├── conexion.py                  # Conexión a SQL Server
-│   └── permisos.py                  # Gestión de permisos y roles
-└── mkdir_pantallas/                 # Pantallas/interfaces
-    ├── login.py                     # Pantalla de login
-    └── login_sc.kv                  # Interfaz gráfica del login
 
 
 
