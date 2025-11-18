@@ -1,4 +1,5 @@
 from kivy.uix.screenmanager import Screen
+from kivy.properties import ObjectProperty
 import hashlib
 from mkdir_database.conexion import ejecutar_consulta
 
@@ -11,14 +12,17 @@ class LoginScreen(Screen):
             self.mostrar_mensaje("Por favor, complete todos los campos", error=True)
             return False
 
+        # Hash de la contraseña
         password_hash = hashlib.sha256(password.encode()).hexdigest()
 
+        # Consulta SQL compatible con SQLite
         consulta = """
             SELECT u.UsuarioID, u.NombreUsuario, u.RolID, r.Nombre as RolNombre, u.EmpleadoID
             FROM Usuarios u
-            INNER JOIN Roles r ON u.RolID = r.RolID
+            JOIN Roles r ON u.RolID = r.RolID
             WHERE u.NombreUsuario = ? AND u.ClaveHash = ? AND u.Estado = 1
         """
+
         resultado = ejecutar_consulta(consulta, (usuario, password_hash))
 
         if resultado and len(resultado) > 0:
@@ -35,18 +39,24 @@ class LoginScreen(Screen):
 
             # Cambiar de pantalla según el rol
             rol = usuario_data['RolNombre'].lower()
-            if rol == 'administrador':
-                self.manager.current = "factura"  # Podés cambiarlo por "panel_admin"
+
+            if rol == "administrador":
+                self.manager.current = "admin"         # PANEL ADMIN
+            elif rol == "empleado":
+                self.manager.current = "menu_principal"
+            elif rol == "vendedor":
+                self.manager.current = "menu_principal"
             else:
-                self.manager.current = "factura"
+                self.manager.current = "menu_principal"
 
             return True
+
         else:
             self.mostrar_mensaje("Usuario o contraseña incorrectos", error=True)
             return False
 
     def mostrar_mensaje(self, mensaje, error=True):
-        """Muestra mensajes en la etiqueta del login"""
+        """Muestra mensajes en etiqueta del KV"""
         if hasattr(self, 'ids') and 'mensaje_label' in self.ids:
             mensaje_label = self.ids.mensaje_label
             mensaje_label.text = mensaje

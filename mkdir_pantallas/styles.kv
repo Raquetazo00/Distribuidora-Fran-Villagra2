@@ -1,21 +1,26 @@
 #:import dp kivy.metrics.dp
 
+# --- Etiquetas ---
 <Label>:
-    color: app.text_color if hasattr(app, 'text_color') else (0, 0, 0, 1)
+    color: 0, 0, 0, 1
 
+# --- Botones ---
 <Button>:
-    color: app.text_color if hasattr(app, 'text_color') else (1, 1, 1, 1)
+    background_normal: ""        # Desactiva el fondo negro default
+    background_color: 0.2, 0.6, 0.9, 1
+    color: 1, 1, 1, 1
+    font_size: dp(16)
+    padding: dp(8), dp(8)
 
-<ToggleButton>:
-    color: app.text_color if hasattr(app, 'text_color') else (1, 1, 1, 1)
-
+# --- Inputs ---
 <TextInput>:
-    foreground_color: app.text_color if hasattr(app, 'text_color') else (0, 0, 0, 1)
-    cursor_color: app.text_color if hasattr(app, 'text_color') else (0, 0, 0, 1)
+    foreground_color: 0, 0, 0, 1
+    cursor_color: 0, 0, 0, 1
+    background_normal: ""
+    background_color: 1, 1, 1, 1
 
+# --- Spinner ---
 <Spinner>:
-    color: app.text_color if hasattr(app, 'text_color') else (0, 0, 0, 1)
-
-# Small default for Menu labels/buttons
-[Label@Widget]:
-    font_size: dp(14)
+    background_normal: ""
+    background_color: 1, 1, 1, 1
+    color: 0, 0, 0, 1

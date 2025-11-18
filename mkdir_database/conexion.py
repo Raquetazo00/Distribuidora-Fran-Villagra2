@@ -16,7 +16,7 @@ import traceback
 from pathlib import Path
 
 # Configuración SQLite
-_SQLITE_DB_PATH = os.environ.get('SQLITE_DB_PATH', os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'distribuidora.db'))
+_SQLITE_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'distribuidora.db')
 _BACKEND = 'sqlite'
 
 
@@ -112,14 +112,10 @@ def _ensure_sqlite_db():
 
 
 def conectar():
-    """Devuelve una conexión al SQLite.
-
-    Retorna None si no puede conectarse.
-    """
+    """Devuelve una conexión al SQLite. Retorna None si falla."""
     try:
         _ensure_sqlite_db()
         conn = sqlite3.connect(str(Path(_SQLITE_DB_PATH)))
-        # Habilitar acceso por nombre de columna si se desea
         return conn
     except Exception as error:
         print(f"Error al conectar con SQLite: {error}")
@@ -136,17 +132,8 @@ def cerrar_conexion(conexion):
         pass
 
 
-
 def ejecutar_consulta(consulta, parametros=None):
-<<<<<<< Updated upstream
-    """
-    Ejecuta una consulta SQL genérica
-=======
-    """Ejecuta una consulta genérica y devuelve filas para SELECT o rowcount para DML.
-
-    parametros debe ser una tupla o lista. Usa '?' como placeholder (compatible con sqlite).
->>>>>>> Stashed changes
-    """
+    """Ejecuta una consulta genérica y devuelve filas para SELECT o rowcount para DML."""
     conexion = conectar()
     if not conexion:
         return None
@@ -176,63 +163,22 @@ def ejecutar_consulta(consulta, parametros=None):
         cerrar_conexion(conexion)
 
 
-<<<<<<< Updated upstream
-def obtener_productos():
-    """Obtiene todos los productos activos"""
-    conn = conectar()  # ✅ corregido (antes decía conexion())
-    if not conn:
-        print("No se pudo conectar a la base de datos")
-        return []
-
-    try:
-        cursor = conn.cursor()
-        cursor.execute("SELECT ProductoID, Nombre, Precio, Stock FROM Productos")
-        productos = cursor.fetchall()
-        return productos
-    except pyodbc.Error as error:
-        print(f"Error al obtener productos: {error}")
-        return []
-    finally:
-        conn.close()
-
-
-def descontar_stock(producto_id, cantidad):
-    """Descuenta stock de un producto"""
-    conn = conectar()
-    if not conn:
-        print("No se pudo conectar a la base de datos")
-        return
-
-    try:
-        cursor = conn.cursor()
-        cursor.execute("""
-            UPDATE dbo.Productos
-            SET Stock = Stock - ?
-            WHERE ProductoID = ? AND Stock >= ?
-        """, (cantidad, producto_id, cantidad))
-        conn.commit()
-    except pyodbc.Error as error:
-        print(f"Error al descontar stock: {error}")
-        conn.rollback()
-    finally:
-        conn.close()
-
-
-# Prueba manual (solo si ejecutás este archivo directamente)
-if __name__ == "__main__":
-    conexion = conectar()
-    if conexion:
-        print("Conexión exitosa a SQL Server")
-        cerrar_conexion(conexion)
-
-    productos = obtener_productos()
-    for p in productos:
-        print(p)
-=======
 if __name__ == '__main__':
     # Prueba de conexión rápida
     conn = conectar()
     if conn:
         print(f"Conectado usando backend: {_BACKEND}")
         cerrar_conexion(conn)
->>>>>>> Stashed changes
+
+
+def obtener_productos():
+    """Devuelve todos los productos activos"""
+    consulta = "SELECT ProductoID, Nombre, Descripcion, Precio, Stock FROM Productos WHERE Activo=1"
+    resultados = ejecutar_consulta(consulta)
+    return resultados or []
+
+
+def descontar_stock(producto_id, cantidad):
+    """Descuenta stock de un producto"""
+    consulta = "UPDATE Productos SET Stock = Stock - ? WHERE ProductoID = ? AND Stock >= ?"
+    ejecutar_consulta(consulta, (cantidad, producto_id, cantidad))

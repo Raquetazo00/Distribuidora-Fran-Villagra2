@@ -1,35 +1,21 @@
-from kivy.app import App
+from kivy.uix.screenmanager import Screen
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.metrics import dp
-from kivy.clock import Clock
-from kivy.lang import Builder
-import os
-from mkdir_database.conexion import ejecutar_consulta
 
-# Cargar el KV
-ruta_kv = os.path.join(os.path.dirname(__file__), "agregar_producto.kv")
-if os.path.exists(ruta_kv):
-    Builder.load_file(ruta_kv)
-    print("✅ agregar_producto.kv cargado correctamente.")
-else:
-    print("⚠️ No se encontró agregar_producto.kv en:", ruta_kv)
+try:
+    from mkdir_database.conexion import ejecutar_consulta
+except Exception:
+    ejecutar_consulta = None
 
 
-class AgregarProductoScreen(BoxLayout):
+class AgregarProductoScreen(Screen):
     producto_editando_id = None
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        Clock.schedule_once(self._esperar_tabla, 0.3)
-
-    def _esperar_tabla(self, dt):
-        if "tabla_productos" in self.ids:
-            self.mostrar_productos()
-        else:
-            Clock.schedule_once(self._esperar_tabla, 0.2)
+    def on_pre_enter(self, *args):
+        """Cuando se entra a la pantalla, cargar productos."""
+        self.mostrar_productos()
 
     # ------------------------------
     # AGREGAR o ACTUALIZAR
@@ -39,30 +25,40 @@ class AgregarProductoScreen(BoxLayout):
         descripcion = self.ids.descripcion_input.text.strip()
         precio = self.ids.precio_input.text.strip()
         stock = self.ids.stock_input.text.strip()
-        fecha_venc = self.ids.fecha_input.text.strip()
         codigo_barras = self.ids.codigo_input.text.strip()
 
+        if not ejecutar_consulta:
+            print("⚠️ ejecutar_consulta no configurado")
+            return
+
         if not nombre or not precio or not stock:
-            print("⚠️ Debes completar al menos el nombre, precio y stock.")
+            print("⚠️ Debes completar al menos nombre, precio y stock.")
+            return
+
+        try:
+            precio_val = float(precio)
+            stock_val = int(stock)
+        except ValueError:
+            print("⚠️ Precio o stock inválidos.")
             return
 
         try:
             if self.producto_editando_id is None:
                 consulta = """
-                    INSERT INTO Productos (Nombre, Descripcion, Precio, Stock, FechaVencimiento, CodigoBarras)
-                    VALUES (?, ?, ?, ?, ?, ?)
+                    INSERT INTO Productos (Nombre, Descripcion, Precio, Stock, CodigoBarras, Activo)
+                    VALUES (?, ?, ?, ?, ?, 1)
                 """
-                parametros = (nombre, descripcion, float(precio), int(stock), fecha_venc or None, codigo_barras)
+                parametros = (nombre, descripcion, precio_val, stock_val, codigo_barras)
                 ejecutar_consulta(consulta, parametros)
                 print("✅ Producto agregado correctamente.")
             else:
                 consulta = """
                     UPDATE Productos
-                    SET Nombre=?, Descripcion=?, Precio=?, Stock=?, FechaVencimiento=?, CodigoBarras=?
+                    SET Nombre=?, Descripcion=?, Precio=?, Stock=?, CodigoBarras=?
                     WHERE ProductoID=?
                 """
                 parametros = (
-                    nombre, descripcion, float(precio), int(stock), fecha_venc or None,
+                    nombre, descripcion, precio_val, stock_val,
                     codigo_barras, self.producto_editando_id
                 )
                 ejecutar_consulta(consulta, parametros)
@@ -76,125 +72,132 @@ class AgregarProductoScreen(BoxLayout):
             print(f"❌ Error al guardar producto: {e}")
 
     # ------------------------------
+    # LIMPIAR CAMPOS
+    # ------------------------------
+    def limpiar_campos(self):
+        self.ids.nombre_input.text = ""
+        self.ids.descripcion_input.text = ""
+        self.ids.precio_input.text = ""
+        self.ids.stock_input.text = ""
+        self.ids.codigo_input.text = ""
+
+    # ------------------------------
+    # VOLVER AL PANEL ADMIN
+    # ------------------------------
+    def volver_al_panel(self):
+        self.manager.current = "admin"  # Asegurate que el Screen se llame "admin"
+
+    # ------------------------------
+    # CARGAR PRODUCTOS
+    # ------------------------------
+    def mostrar_productos(self):
+        contenedor = self.ids.tabla_productos
+        contenedor.clear_widgets()
+
+        if not ejecutar_consulta:
+            contenedor.add_widget(Label(text="Sin conexión a BD", color=(0, 0, 0, 1)))
+            return
+
+        try:
+            consulta = """
+                SELECT ProductoID, Nombre, Descripcion, Precio, Stock, CodigoBarras
+                FROM Productos
+                WHERE Activo = 1
+                ORDER BY Nombre
+            """
+            filas = ejecutar_consulta(consulta)
+        except Exception as e:
+            contenedor.add_widget(Label(text=f"Error al cargar: {e}", color=(0, 0, 0, 1)))
+            return
+
+        if not filas:
+            contenedor.add_widget(Label(text="No hay productos cargados.", color=(0, 0, 0, 1)))
+            return
+
+        for fila in filas:
+            pid, nombre, desc, precio, stock, cod_barras = fila
+
+            fila_layout = BoxLayout(size_hint_y=None, height=dp(35), spacing=dp(10))
+            fila_layout.add_widget(Label(text=str(pid), color=(0, 0, 0, 1)))
+            fila_layout.add_widget(Label(text=nombre, color=(0, 0, 0, 1)))
+            fila_layout.add_widget(Label(text=f"${float(precio):.2f}", color=(0, 0, 0, 1)))
+            fila_layout.add_widget(Label(text=f"Stock: {stock}", color=(0, 0, 0, 1)))
+            fila_layout.add_widget(Label(text=f"CB: {cod_barras or '-'}", color=(0, 0, 0, 1)))
+
+            # Botón editar (solo visual, puedes implementar lógica luego)
+            btn_editar = Button(
+                text="Editar",
+                size_hint_x=None,
+                width=dp(80),
+                on_release=lambda x, p=fila: self.cargar_en_formulario(p)
+            )
+            fila_layout.add_widget(btn_editar)
+
+            contenedor.add_widget(fila_layout)
+
+    # ------------------------------
     # BUSCAR PRODUCTOS
     # ------------------------------
     def buscar_productos(self):
         texto = self.ids.buscar_input.text.strip()
-        if texto == "":
+        if not texto:
             self.mostrar_productos()
-            return
-
-        consulta = """
-            SELECT ProductoID, Nombre, Descripcion, Precio, Stock
-            FROM Productos
-            WHERE Nombre LIKE ? OR CodigoBarras LIKE ?
-        """
-        parametro = f"%{texto}%"
-        resultados = ejecutar_consulta(consulta, (parametro, parametro))
-        self.mostrar_productos(resultados)
-
-    # ------------------------------
-    # MOSTRAR PRODUCTOS
-    # ------------------------------
-    def mostrar_productos(self, resultados=None):
-        if "tabla_productos" not in self.ids:
-            print("⚠️ No se encontró el id 'tabla_productos'")
             return
 
         contenedor = self.ids.tabla_productos
         contenedor.clear_widgets()
 
-        if resultados is None:
-            resultados = ejecutar_consulta(
-                "SELECT ProductoID, Nombre, Descripcion, Precio, Stock FROM Productos"
-            )
-
-        if not resultados:
-            contenedor.add_widget(Label(text="No hay productos registrados", color=(0, 0, 0, 1)))
+        if not ejecutar_consulta:
+            contenedor.add_widget(Label(text="Sin conexión a BD", color=(0, 0, 0, 1)))
             return
 
-        header = GridLayout(cols=7, size_hint_y=None, height=dp(35))
-        for titulo in ["ID", "Nombre", "Descripción", "Precio", "Stock", "Editar", "Eliminar"]:
-            header.add_widget(Label(text=titulo, bold=True, color=(0, 0, 0, 1)))
-        contenedor.add_widget(header)
+        try:
+            consulta = """
+                SELECT ProductoID, Nombre, Descripcion, Precio, Stock, CodigoBarras
+                FROM Productos
+                WHERE (Nombre LIKE ? OR CodigoBarras LIKE ?)
+                  AND Activo = 1
+                ORDER BY Nombre
+            """
+            param = f"%{texto}%"
+            filas = ejecutar_consulta(consulta, (param, param))
+        except Exception as e:
+            contenedor.add_widget(Label(text=f"Error al buscar: {e}", color=(0, 0, 0, 1)))
+            return
 
-        for fila in resultados:
-            producto_id, nombre, desc, precio, stock = fila
-            fila_layout = GridLayout(cols=7, size_hint_y=None, height=dp(35))
-            for valor in [producto_id, nombre, desc, precio, stock]:
-                fila_layout.add_widget(Label(text=str(valor), color=(0, 0, 0, 1)))
+        if not filas:
+            contenedor.add_widget(Label(text="No se encontraron productos.", color=(0, 0, 0, 1)))
+            return
 
-            btn_edit = Button(
+        for fila in filas:
+            pid, nombre, desc, precio, stock, cod_barras = fila
+
+            fila_layout = BoxLayout(size_hint_y=None, height=dp(35), spacing=dp(10))
+            fila_layout.add_widget(Label(text=str(pid), color=(0, 0, 0, 1)))
+            fila_layout.add_widget(Label(text=nombre, color=(0, 0, 0, 1)))
+            fila_layout.add_widget(Label(text=f"${float(precio):.2f}", color=(0, 0, 0, 1)))
+            fila_layout.add_widget(Label(text=f"Stock: {stock}", color=(0, 0, 0, 1)))
+            fila_layout.add_widget(Label(text=f"CB: {cod_barras or '-'}", color=(0, 0, 0, 1)))
+
+            btn_editar = Button(
                 text="Editar",
                 size_hint_x=None,
                 width=dp(80),
-                background_color=(0.0, 0.6, 0.0, 1),
-                color=(1, 1, 1, 1),
-                on_release=lambda btn, pid=producto_id: self.editar_producto(pid)
+                on_release=lambda x, p=fila: self.cargar_en_formulario(p)
             )
-            fila_layout.add_widget(btn_edit)
-
-            btn_del = Button(
-                text="Eliminar",
-                size_hint_x=None,
-                width=dp(80),
-                background_color=(0.8, 0.1, 0.1, 1),
-                color=(1, 1, 1, 1),
-                on_release=lambda btn, pid=producto_id: self.eliminar_producto(pid)
-            )
-            fila_layout.add_widget(btn_del)
+            fila_layout.add_widget(btn_editar)
 
             contenedor.add_widget(fila_layout)
 
     # ------------------------------
-    # EDITAR
+    # Cargar producto en formulario para editar
     # ------------------------------
-    def editar_producto(self, producto_id):
-        consulta = "SELECT * FROM Productos WHERE ProductoID = ?"
-        datos = ejecutar_consulta(consulta, (producto_id,))
-        if not datos:
-            print("⚠️ No se encontró el producto.")
-            return
-
-        producto = datos[0]
-        self.ids.nombre_input.text = producto[1] or ""
-        self.ids.descripcion_input.text = producto[2] or ""
-        self.ids.precio_input.text = str(producto[3] or "")
-        self.ids.stock_input.text = str(producto[4] or "")
-        self.ids.fecha_input.text = str(producto[5] or "")
-        self.ids.codigo_input.text = producto[6] or ""
-        self.producto_editando_id = producto_id
-        self.ids.boton_agregar.text = "Guardar Cambios"
-        print(f"✏️ Editando producto {producto_id}")
-
-    # ------------------------------
-    # ELIMINAR
-    # ------------------------------
-    def eliminar_producto(self, producto_id):
-        try:
-            consulta = "DELETE FROM Productos WHERE ProductoID = ?"
-            ejecutar_consulta(consulta, (producto_id,))
-            print(f"🗑️ Producto {producto_id} eliminado correctamente.")
-            self.mostrar_productos()
-        except Exception as e:
-            print(f"❌ Error al eliminar producto: {e}")
-
-    # ------------------------------
-    # LIMPIAR
-    # ------------------------------
-    def limpiar_campos(self):
-        for campo in [
-            "nombre_input", "descripcion_input", "precio_input",
-            "stock_input", "fecha_input", "codigo_input"
-        ]:
-            self.ids[campo].text = ""
-
-    # ------------------------------
-    # VOLVER
-    # ------------------------------
-    def volver_al_panel(self):
-        from mkdir_pantallas.panel_admin import PanelAdminScreen
-        app = App.get_running_app()
-        root = app.root
-        root.clear_widgets()
-        root.add_widget(PanelAdminScreen())
+    def cargar_en_formulario(self, fila):
+        pid, nombre, desc, precio, stock, cod_barras = fila
+        self.producto_editando_id = pid
+        self.ids.nombre_input.text = nombre or ""
+        self.ids.descripcion_input.text = desc or ""
+        self.ids.precio_input.text = str(precio)
+        self.ids.stock_input.text = str(stock)
+        self.ids.codigo_input.text = cod_barras or ""
+        self.ids.boton_agregar.text = "Actualizar Producto"
