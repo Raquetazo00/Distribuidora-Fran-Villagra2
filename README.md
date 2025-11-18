@@ -22,7 +22,7 @@ Sistema de gestión para distribuidora desarrollado con Python, Kivy y SQL Serve
 
 ### 1. Clonar o descargar el repositorio
 
-git clone <url-del-repositorio>
+git clone (https://github.com/Raquetazo00/Distribuidora-Fran-Villagra2)
 cd Distribuidora-Fran-Villagra2### 2. Instalar dependencias de Python
 
 Abre PowerShell o CMD en la carpeta del proyecto y ejecuta:
