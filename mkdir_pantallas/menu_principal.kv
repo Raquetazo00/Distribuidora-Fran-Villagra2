@@ -1,144 +1,147 @@
 <MenuPrincipalScreen>:
 
-    AnchorLayout:
-        anchor_x: 'center'
-        anchor_y: 'center'
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
+        spacing: dp(15)
+        md_bg_color: 0.96, 0.96, 0.97, 1
 
-        BoxLayout:
-            orientation: "vertical"
-            size_hint: 0.92, None
-            height: self.minimum_height
-            spacing: dp(20)
-            padding: dp(20)
+        # ============================
+        # HEADER
+        # ============================
+        MDBoxLayout:
+            size_hint_y: None
+            height: dp(60)
+            padding: dp(10)
+            spacing: dp(10)
 
-            canvas.before:
-                Color:
-                    rgba: 0.95, 0.95, 0.97, 1
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
-
-            # -----------------------
-            # ENCABEZADO
-            # -----------------------
-            BoxLayout:
-                size_hint_y: None
-                height: dp(45)
-                spacing: dp(10)
-
-                # ❗ ELIMINADO botón Clientes
-                # ❗ ELIMINADA etiqueta “Cliente no seleccionado”
-
-                Widget:   # Ocupa el espacio vacío para mantener estructura
-
-                Label:
-                    text: root.hora_actual
-                    font_size: dp(18)
-                    bold: True
-                    color: 0.1, 0.1, 0.1, 1
-                    size_hint_x: None
-                    width: dp(100)
-
-                Button:
-                    text: "Salir"
-                    size_hint: None, None
-                    size: dp(80), dp(35)
-                    on_release: root.confirmar_salida()
-                    font_size: dp(14)
-                    color: 1, 1, 1, 1
-                    canvas.before:
-                        Color:
-                            rgba: 0.9, 0.2, 0.2, 1
-                        RoundedRectangle:
-                            pos: self.pos
-                            size: self.size
-                            radius: [8]
-
-            # -----------------------
-            # BUSCADOR
-            # -----------------------
-            BoxLayout:
-                size_hint_y: None
-                height: dp(45)
-                spacing: dp(10)
-
-                TextInput:
-                    id: buscar_input
-                    hint_text: "Buscar producto por nombre o código..."
-                    multiline: False
-                    on_text_validate: root.programar_busqueda(self.text)
-
-                Button:
-                    text: "Buscar"
-                    size_hint_x: None
-                    width: dp(120)
-                    on_release: root.buscar_producto(buscar_input.text)
-                    color: 1, 1, 1, 1
-                    canvas.before:
-                        Color:
-                            rgba: 0.2, 0.6, 0.9, 1
-                        RoundedRectangle:
-                            pos: self.pos
-                            size: self.size
-                            radius: [10]
-
-            Label:
-                text: "Productos disponibles"
-                font_size: dp(18)
+            MDLabel:
+                text: "Menú Principal"
+                font_style: "H5"
                 bold: True
-                size_hint_y: None
-                height: dp(35)
-                color: 0, 0, 0, 1
+                theme_text_color: "Primary"
+
+            Widget:
+
+            MDLabel:
+                text: root.hora_actual
+                font_style: "H6"
+                halign: "right"
+                theme_text_color: "Secondary"
+
+            MDRaisedButton:
+                text: "Salir"
+                md_bg_color: 0.9, 0.2, 0.2, 1
+                text_color: 1,1,1,1
+                on_release: root.confirmar_salida()
+                size_hint: None, None
+                width: dp(100)
+                height: dp(40)
+
+        # ============================
+        # BUSCADOR
+        # ============================
+        MDBoxLayout:
+            size_hint_y: None
+            height: dp(55)
+            spacing: dp(10)
+
+            MDTextField:
+                id: buscar_input
+                hint_text: "Buscar producto por nombre o código..."
+                mode: "rectangle"
+                on_text_validate: root.programar_busqueda(self.text)
+
+            MDRaisedButton:
+                text: "Buscar"
+                md_bg_color: 0.15, 0.55, 0.85, 1
+                text_color: 1,1,1,1
+                size_hint_x: None
+                width: dp(130)
+                on_release: root.buscar_producto(buscar_input.text)
+
+        # ============================
+        # TÍTULO PRODUCTOS
+        # ============================
+        MDLabel:
+            text: "Productos disponibles"
+            font_style: "H6"
+            size_hint_y: None
+            height: dp(35)
+            theme_text_color: "Primary"
+
+        # ============================
+        # TABLA DE PRODUCTOS
+        # ============================
+        MDCard:
+            radius: dp(15)
+            elevation: 8
+            padding: dp(10)
+            size_hint_y: None
+            height: dp(230)
+            md_bg_color: 1,1,1,1
 
             ScrollView:
-                size_hint_y: None
-                height: dp(200)
-                bar_width: dp(10)
-
-                BoxLayout:
+                MDBoxLayout:
                     id: tabla_productos
                     orientation: "vertical"
+                    spacing: dp(8)
+                    padding: dp(10)
                     size_hint_y: None
                     height: self.minimum_height
-                    spacing: dp(4)
-                    padding: dp(6)
 
-            Label:
-                text: "Productos en la venta actual"
-                font_size: dp(18)
-                bold: True
-                size_hint_y: None
-                height: dp(35)
-                color: 0, 0, 0, 1
+        # ============================
+        # TÍTULO CARRITO
+        # ============================
+        MDLabel:
+            text: "Productos en la venta actual"
+            font_style: "H6"
+            size_hint_y: None
+            height: dp(35)
+            theme_text_color: "Primary"
+
+        # ============================
+        # TABLA CARRITO
+        # ============================
+        MDCard:
+            radius: dp(15)
+            elevation: 8
+            padding: dp(10)
+            size_hint_y: None
+            height: dp(230)
+            md_bg_color: 1,1,1,1
 
             ScrollView:
-                size_hint_y: None
-                height: dp(200)
-                bar_width: dp(10)
-
-                BoxLayout:
+                MDBoxLayout:
                     id: tabla_carrito
                     orientation: "vertical"
+                    spacing: dp(8)
+                    padding: dp(10)
                     size_hint_y: None
                     height: self.minimum_height
-                    spacing: dp(4)
-                    padding: dp(6)
 
-            BoxLayout:
-                size_hint_y: None
-                height: dp(60)
-                spacing: dp(10)
+        # ============================
+        # TOTAL + BOTÓN
+        # ============================
+        MDBoxLayout:
+            size_hint_y: None
+            height: dp(65)
+            spacing: dp(10)
+            padding: dp(5)
 
-                Label:
-                    id: lbl_total
-                    text: "Total: $0.00"
-                    font_size: dp(22)
-                    bold: True
-                    color: 0, 0, 0, 1
+            MDLabel:
+                id: lbl_total
+                text: "Total: $0.00"
+                font_style: "H5"
+                bold: True
+                theme_text_color: "Primary"
 
-                Button:
-                    text: "Previsualizar Venta"
-                    background_color: 0.1, 0.6, 0.3, 1
-                    color: 1, 1, 1, 1
-                    font_size: dp(18)
-                    on_release: root.previsualizar_venta()
+            MDRaisedButton:
+                text: "Previsualizar Venta"
+                md_bg_color: 0.15, 0.6, 0.35, 1
+                text_color: 1,1,1,1
+                font_size: dp(18)
+                on_release: root.previsualizar_venta()
+                size_hint: None, None
+                width: dp(230)
+                height: dp(50)

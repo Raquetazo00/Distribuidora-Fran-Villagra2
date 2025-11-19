@@ -1,4 +1,7 @@
 #:import dp kivy.metrics.dp
+#:import MDCard kivymd.uix.card.MDCard
+#:import MDRaisedButton kivymd.uix.button.MDRaisedButton
+#:import MDTextField kivymd.uix.textfield.MDTextField
 
 <FacturaScreen>:
 
@@ -9,7 +12,7 @@
             pos: self.pos
             size: self.size
 
-    BoxLayout:
+    MDBoxLayout:
         orientation: "vertical"
         spacing: dp(20)
         padding: dp(25)
@@ -17,226 +20,255 @@
         # =====================================================
         #   BOTÓN VOLVER (arriba a la derecha)
         # =====================================================
-        BoxLayout:
+        MDBoxLayout:
             size_hint_y: None
             height: dp(40)
 
             Widget:
 
-            Button:
+            MDRaisedButton:
                 text: "< Volver"
+                md_bg_color: 0.1, 0.2, 0.35, 1
+                text_color: 1,1,1,1
                 size_hint: None, None
                 size: dp(120), dp(35)
-                background_color: 0.1, 0.2, 0.35, 1
-                color: 1,1,1,1
                 on_release: root.volver_menu()
 
         # =====================================================
         # TÍTULO
         # =====================================================
-        Label:
+        MDLabel:
             text: "Facturación"
-            font_size: dp(34)
-            bold: True
-            color: 0.15, 0.15, 0.15, 1
+            halign: "center"
+            font_style: "H4"
             size_hint_y: None
-            height: dp(50)
+            height: dp(45)
+            color: 0.15, 0.15, 0.15, 1
 
         # =====================================================
         # TIPO DE FACTURA
         # =====================================================
-        BoxLayout:
+        MDCard:
+            radius: 20
+            elevation: 4
+            padding: dp(20)
+            md_bg_color: 1,1,1,1
             size_hint_y: None
-            height: dp(60)
-            spacing: dp(10)
+            height: dp(80)
 
-            Label:
-                text: "Tipo de Factura:"
-                bold: True
-                font_size: dp(18)
-                size_hint_x: 0.25
-                color: 0.15, 0.15, 0.15, 1
+            MDBoxLayout:
+                orientation: "horizontal"
+                spacing: dp(15)
 
-            Spinner:
-                id: tipo_factura
-                text: "Factura A"
-                values: ["Factura A", "Factura B"]
-                size_hint_x: 0.35
-                font_size: dp(17)
+                MDLabel:
+                    text: "Tipo de Factura:"
+                    size_hint_x: None
+                    width: dp(150)
+                    bold: True
+                    font_size: dp(18)
+                    halign: "left"
+                    valign: "middle"
 
-            Widget:
+                Spinner:
+                    id: tipo_factura
+                    text: "Factura A"
+                    values: ["Factura A", "Factura B"]
+                    size_hint_x: None
+                    width: dp(180)
+                    font_size: dp(17)
+
+                Widget:
 
         # =====================================================
         # SECCIÓN DATOS DEL CLIENTE
         # =====================================================
-        Label:
+        MDLabel:
             text: "Datos del Cliente"
-            font_size: dp(22)
-            bold: True
+            font_style: "H5"
             size_hint_y: None
             height: dp(40)
-            color: 0.12, 0.12, 0.12, 1
+            color: 0.1, 0.1, 0.1, 1
 
-        # --- BOTONES DE CLIENTES ---
-        BoxLayout:
+        MDCard:
+            radius: 20
+            padding: dp(20)
+            elevation: 3
+            md_bg_color: 1, 1, 1, 1
             size_hint_y: None
-            height: dp(45)
-            spacing: dp(10)
+            height: dp(220)
 
-            Button:
-                text: "Clientes"
-                size_hint_x: None
-                width: dp(120)
-                background_color: 0.1, 0.3, 0.6, 1
-                color: 1,1,1,1
-                font_size: dp(16)
-                on_release: root.abrir_gestion_clientes()
-
-            Button:
-                text: "Seleccionar Cliente"
-                size_hint_x: None
-                width: dp(170)
-                background_color: 0.2, 0.6, 0.9, 1
-                color: 1,1,1,1
-                font_size: dp(16)
-                on_release: root.abrir_selector_cliente()
-
-            Widget:
-
-        GridLayout:
-            cols: 4
-            size_hint_y: None
-            height: dp(50)
-            spacing: dp(10)
-
-            TextInput:
-                id: cliente_nombre
-                hint_text: "Nombre"
-
-            TextInput:
-                id: cliente_telefono
-                hint_text: "Teléfono"
-
-            TextInput:
-                id: cliente_email
-                hint_text: "Email"
-
-        TextInput:
-            id: cliente_ci
-            hint_text: "C.I. / RUT"
-            size_hint_y: None
-            height: dp(45)
-
-        # =====================================================
-        # DOS COLUMNAS PRINCIPALES (Productos + Carrito)
-        # =====================================================
-        BoxLayout:
-            orientation: "horizontal"
-            spacing: dp(25)
-            size_hint_y: 1
-
-            # ----------------------------
-            #      IZQUIERDA – PRODUCTOS
-            # ----------------------------
-            BoxLayout:
+            MDBoxLayout:
                 orientation: "vertical"
                 spacing: dp(15)
 
-                Label:
-                    text: "Agregar productos"
-                    bold: True
-                    font_size: dp(20)
-                    size_hint_y: None
-                    height: dp(35)
-                    color: 0.12, 0.12, 0.12, 1
-
-                TextInput:
-                    id: buscar_producto
-                    hint_text: "Buscar producto..."
-                    size_hint_y: None
-                    height: dp(45)
-                    multiline: False
-                    on_text: root.buscar_producto_factura(self.text)
-
-                ScrollView:
-                    size_hint_y: 0.4
-                    bar_width: dp(8)
-
-                    BoxLayout:
-                        id: resultados_busqueda
-                        orientation: "vertical"
-                        size_hint_y: None
-                        height: self.minimum_height
-                        spacing: dp(6)
-
-                BoxLayout:
+                # --- Botones Clientes ---
+                MDBoxLayout:
                     size_hint_y: None
                     height: dp(45)
                     spacing: dp(10)
 
-                    TextInput:
-                        id: cantidad_producto
-                        hint_text: "1"
-                        input_filter: "int"
-                        size_hint_x: .3
+                    MDRaisedButton:
+                        text: "Clientes"
+                        md_bg_color: 0.1, 0.3, 0.6, 1
+                        text_color: 1,1,1,1
+                        size_hint_x: None
+                        width: dp(120)
+                        on_release: root.abrir_gestion_clientes()
 
-                    Button:
-                        text: "Agregar"
-                        size_hint_x: .7
-                        font_size: dp(17)
-                        background_color: 0.15, 0.45, 0.7, 1
-                        color: 1,1,1,1
-                        on_release: root._agregar_wrapper()
+                    MDRaisedButton:
+                        text: "Seleccionar Cliente"
+                        md_bg_color: 0.15, 0.55, 0.85, 1
+                        text_color: 1,1,1,1
+                        size_hint_x: None
+                        width: dp(180)
+                        on_release: root.abrir_selector_cliente()
 
-            # ----------------------------
-            #     DERECHA – CARRITO
-            # ----------------------------
-            BoxLayout:
-                orientation: "vertical"
-                spacing: dp(15)
+                    Widget:
 
-                Label:
-                    text: "Carrito de Compras"
-                    bold: True
-                    font_size: dp(20)
+                # --- Formulario en 2 columnas ---
+                GridLayout:
+                    cols: 2
+                    spacing: dp(10)
+                    row_force_default: True
+                    row_default_height: dp(45)
                     size_hint_y: None
-                    height: dp(35)
-                    color: 0.12, 0.12, 0.12, 1
+                    height: dp(110)
 
-                ScrollView:
-                    size_hint_y: 1
-                    bar_width: dp(8)
+                    MDTextField:
+                        id: cliente_nombre
+                        hint_text: "Nombre"
+                        mode: "rectangle"
 
-                    GridLayout:
-                        id: carrito_grid
-                        cols: 5
-                        spacing: dp(10)
+                    MDTextField:
+                        id: cliente_telefono
+                        hint_text: "Teléfono"
+                        mode: "rectangle"
+
+                    MDTextField:
+                        id: cliente_email
+                        hint_text: "Email"
+                        mode: "rectangle"
+
+                    MDTextField:
+                        id: cliente_ci
+                        hint_text: "C.I. / RUT"
+                        mode: "rectangle"
+
+        # =====================================================
+        # CONTENEDOR PRINCIPAL (Productos + Carrito)
+        # =====================================================
+        MDBoxLayout:
+            orientation: "horizontal"
+            spacing: dp(25)
+            size_hint_y: 1
+
+            # -----------------------------------------
+            # IZQUIERDA – Agregar productos
+            # -----------------------------------------
+            MDCard:
+                radius: 20
+                elevation: 3
+                padding: dp(20)
+                md_bg_color: 1,1,1,1
+
+                MDBoxLayout:
+                    orientation: "vertical"
+                    spacing: dp(15)
+
+                    MDLabel:
+                        text: "Agregar productos"
+                        font_style: "H6"
                         size_hint_y: None
-                        height: self.minimum_height
+                        height: dp(35)
 
-                Label:
-                    text: "Total: $" + str(root.total_carrito)
-                    font_size: dp(22)
-                    bold: True
-                    size_hint_y: None
-                    height: dp(45)
-                    color: 0.1, 0.1, 0.1, 1
+                    MDTextField:
+                        id: buscar_producto
+                        hint_text: "Buscar producto..."
+                        mode: "rectangle"
+                        size_hint_y: None
+                        height: dp(45)
+                        on_text: root.buscar_producto_factura(self.text)
 
-                BoxLayout:
-                    size_hint_y: None
-                    height: dp(50)
-                    spacing: dp(12)
+                    ScrollView:
+                        size_hint_y: 0.4
+                        bar_width: dp(8)
 
-                    Button:
-                        text: "Vaciar Carrito"
-                        font_size: dp(17)
-                        background_color: 0.7, 0.2, 0.2, 1
-                        color: 1,1,1,1
-                        on_release: root.limpiar_carrito()
+                        MDBoxLayout:
+                            id: resultados_busqueda
+                            orientation: "vertical"
+                            size_hint_y: None
+                            height: self.minimum_height
+                            spacing: dp(6)
 
-                    Button:
-                        text: "Generar Factura"
-                        font_size: dp(17)
-                        background_color: 0.15, 0.6, 0.25, 1
-                        color: 1,1,1,1
-                        on_release: root._generar_wrapper()
+                    MDBoxLayout:
+                        size_hint_y: None
+                        height: dp(45)
+                        spacing: dp(10)
+
+                        MDTextField:
+                            id: cantidad_producto
+                            hint_text: "1"
+                            mode: "rectangle"
+                            input_filter: "int"
+                            size_hint_x: .3
+
+                        MDRaisedButton:
+                            text: "Agregar"
+                            size_hint_x: .7
+                            md_bg_color: 0.15, 0.45, 0.7, 1
+                            text_color: 1,1,1,1
+                            on_release: root._agregar_wrapper()
+
+            # -----------------------------------------
+            # DERECHA – Carrito de Compras
+            # -----------------------------------------
+            MDCard:
+                radius: 20
+                elevation: 3
+                padding: dp(20)
+                md_bg_color: 1,1,1,1
+
+                MDBoxLayout:
+                    orientation: "vertical"
+                    spacing: dp(10)
+
+                    MDLabel:
+                        text: "Carrito de Compras"
+                        font_style: "H6"
+                        size_hint_y: None
+                        height: dp(35)
+
+                    ScrollView:
+                        size_hint_y: 1
+                        bar_width: dp(8)
+
+                        GridLayout:
+                            id: carrito_grid
+                            cols: 5
+                            spacing: dp(10)
+                            size_hint_y: None
+                            height: self.minimum_height
+
+                    MDLabel:
+                        text: "TOTAL: $" + str(root.total_carrito)
+                        font_style: "H5"
+                        size_hint_y: None
+                        height: dp(45)
+                        color: 0.1, 0.1, 0.1, 1
+
+                    MDBoxLayout:
+                        size_hint_y: None
+                        height: dp(50)
+                        spacing: dp(12)
+
+                        MDRaisedButton:
+                            text: "Vaciar Carrito"
+                            md_bg_color: 0.8, 0.2, 0.2, 1
+                            text_color: 1,1,1,1
+                            on_release: root.limpiar_carrito()
+
+                        MDRaisedButton:
+                            text: "Generar Factura"
+                            md_bg_color: 0.15, 0.6, 0.25, 1
+                            text_color: 1,1,1,1
+                            on_release: root._generar_wrapper()

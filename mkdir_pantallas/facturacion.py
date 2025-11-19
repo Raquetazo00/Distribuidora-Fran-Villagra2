@@ -6,6 +6,7 @@ from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.clock import Clock
+from kivymd.uix.menu import MDDropdownMenu
 
 import sys, os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -468,3 +469,19 @@ class FacturaScreen(Screen):
         self.ids.cliente_ci.text = ci
 
         popup.dismiss()
+    def abrir_menu_facturas(self, textfield):
+        menu_items = [
+            {"text": "Factura A", "on_release": lambda: self._set_tipo_factura("Factura A")},
+            {"text": "Factura B", "on_release": lambda: self._set_tipo_factura("Factura B")},
+    ]
+
+        self.menu_factura = MDDropdownMenu(
+            caller=textfield,
+            items=menu_items,
+            width_mult=3
+        )
+        self.menu_factura.open()
+
+    def _set_tipo_factura(self, tipo):
+        self.ids.tipo_factura.text = tipo
+        self.menu_factura.dismiss()

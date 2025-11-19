@@ -1,3 +1,5 @@
+#:import dp kivy.metrics.dp
+
 <DetalleVentaScreen>:
     orientation: "vertical"
     padding: dp(30)
@@ -13,9 +15,26 @@
             height: self.minimum_height
             spacing: dp(20)
 
-            # ---------------------------
-            # ENCABEZADO
-            # ---------------------------
+            # ==================================================
+            # ENCABEZADO GENERAL
+            # ==================================================
+            Label:
+                text: "Distribuidora Fran Villagra"
+                font_size: dp(32)
+                bold: True
+                halign: "center"
+                size_hint_y: None
+                height: dp(50)
+                color: 0, 0, 0, 1
+
+            Label:
+                text: "CUIT 30-12345678-9\nAv. Principal 123 - Tel: 3815000000"
+                font_size: dp(18)
+                halign: "center"
+                size_hint_y: None
+                height: dp(60)
+                color: 0.2, 0.2, 0.2, 1
+
             Label:
                 text: "FACTURA"
                 font_size: dp(40)
@@ -25,24 +44,16 @@
                 height: dp(60)
                 color: 0, 0, 0, 1
 
-            Label:
-                text: "Distribuidora XYZ - CUIT 30-12345678-9\nDirección: Av. Principal 123 - Cel: 3815000000"
-                font_size: dp(18)
-                halign: "center"
-                size_hint_y: None
-                height: dp(60)
-                color: 0.2, 0.2, 0.2, 1
-
-            # ---------------------------
-            # DATOS DE FACTURA Y CLIENTE
-            # ---------------------------
+            # ==================================================
+            # DATOS FACTURA / CLIENTE
+            # ==================================================
             GridLayout:
                 cols: 2
                 size_hint_y: None
-                height: dp(140)
-                spacing: dp(15)
+                height: dp(150)
+                spacing: dp(20)
 
-                # FACTURA
+                # ----- FACTURA -----
                 BoxLayout:
                     orientation: "vertical"
                     spacing: dp(5)
@@ -59,29 +70,24 @@
                         color: 0.2,0.2,0.2,1
 
                     Label:
-                        text: "Método: " + root.metodo
-                        font_size: dp(16)
-                        color: 0.2,0.2,0.2,1
-
-                    Label:
                         text: "Total: $" + str(root.total)
                         font_size: dp(20)
                         bold: True
                         color: 0,0.5,0,1
 
-                # CLIENTE
+                # ----- CLIENTE -----
                 BoxLayout:
                     orientation: "vertical"
                     spacing: dp(5)
 
                     Label:
-                        text: "Cliente:"
+                        text: "Cliente"
                         bold: True
                         font_size: dp(18)
                         color: 0,0,0,1
 
                     Label:
-                        text: root.cli_nombre
+                        text: "Nombre: " + root.cli_nombre
                         font_size: dp(16)
                         color: 0.2,0.2,0.2,1
 
@@ -100,59 +106,77 @@
                         font_size: dp(16)
                         color: 0.2,0.2,0.2,1
 
-            # ---------------------------
+            # ==================================================
             # TABLA DE PRODUCTOS
-            # ---------------------------
+            # ==================================================
             Label:
                 text: ""
-                height: dp(5)
+                height: dp(10)
                 size_hint_y: None
 
-            GridLayout:
-                cols: 4
+            BoxLayout:
+                orientation: "vertical"
                 size_hint_y: None
                 height: self.minimum_height
                 spacing: dp(10)
 
-                # ENCABEZADOS
-                Label:
-                    text: "Producto"
-                    bold: True
-                    font_size: dp(18)
-                    color: 0,0,0,1
+                # ----- Encabezados -----
+                BoxLayout:
+                    size_hint_y: None
+                    height: dp(40)
+                    padding: dp(5)
+                    spacing: dp(10)
 
-                Label:
-                    text: "Cant."
-                    bold: True
-                    halign: "center"
-                    font_size: dp(18)
-                    color: 0,0,0,1
+                    Label:
+                        text: "Producto"
+                        bold: True
+                        font_size: dp(18)
+                        halign: "left"
+                        valign: "middle"
+                        text_size: self.size
 
-                Label:
-                    text: "Precio"
-                    bold: True
-                    halign: "center"
-                    font_size: dp(18)
-                    color: 0,0,0,1
+                    Label:
+                        text: "Cant."
+                        bold: True
+                        font_size: dp(18)
+                        halign: "center"
+                        valign: "middle"
+                        text_size: self.size
+                        size_hint_x: 0.15
 
-                Label:
-                    text: "Subtotal"
-                    bold: True
-                    halign: "right"
-                    font_size: dp(18)
-                    color: 0,0,0,1
+                    Label:
+                        text: "Precio"
+                        bold: True
+                        font_size: dp(18)
+                        halign: "center"
+                        valign: "middle"
+                        text_size: self.size
+                        size_hint_x: 0.2
 
-                # Aquí se insertan filas dinámicas desde Python
+                    Label:
+                        text: "Subtotal"
+                        bold: True
+                        font_size: dp(18)
+                        halign: "right"
+                        valign: "middle"
+                        text_size: self.size
+                        size_hint_x: 0.25
+
+                # ----- FILAS DINÁMICAS (CORREGIDO) -----
                 GridLayout:
                     id: tabla_items
                     cols: 4
                     size_hint_y: None
                     height: self.minimum_height
+                    row_default_height: dp(35)
+                    row_force_default: True
                     spacing: dp(10)
 
-    # ---------------------------
-    # BOTONES
-    # ---------------------------
+
+
+    # ==================================================
+    # BOTONES PDF & VOLVER
+    # ==================================================
     BoxLayout:
         size_hint_y: None
         height: dp(60)

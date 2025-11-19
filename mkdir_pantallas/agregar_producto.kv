@@ -1,122 +1,132 @@
 <AgregarProductoScreen>:
-    orientation: "vertical"
-    padding: dp(20)
-    spacing: dp(10)
+    name: "agregar_producto"
 
-    Label:
-        text: "Gestión de Productos"
-        font_size: dp(28)
-        bold: True
-        color: 0, 0, 0, 1
-        size_hint_y: None
-        height: dp(50)
-
-    # ------------------------------
-    # FORMULARIO DE PRODUCTO
-    # ------------------------------
-    GridLayout:
-        cols: 2
-        row_default_height: dp(35)
-        size_hint_y: None
-        height: self.minimum_height
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
         spacing: dp(10)
+        md_bg_color: 0.97, 0.97, 0.97, 1
 
-        Label:
-            text: "Nombre:"
-            color: 0, 0, 0, 1
-        TextInput:
-            id: nombre_input
-
-        Label:
-            text: "Descripción:"
-            color: 0, 0, 0, 1
-        TextInput:
-            id: descripcion_input
-
-        Label:
-            text: "Precio:"
-            color: 0, 0, 0, 1
-        TextInput:
-            id: precio_input
-            input_filter: "float"
-
-        Label:
-            text: "Stock:"
-            color: 0, 0, 0, 1
-        TextInput:
-            id: stock_input
-            input_filter: "int"
-
-        Label:
-            text: "Fecha Vencimiento:"
-            color: 0, 0, 0, 1
-        TextInput:
-            id: fecha_input
-            hint_text: "YYYY-MM-DD"
-
-        Label:
-            text: "Código de Barras:"
-            color: 0, 0, 0, 1
-        TextInput:
-            id: codigo_input
-
-    Button:
-        id: boton_agregar
-        text: "Agregar Producto"
-        size_hint_y: None
-        height: dp(45)
-        on_release: root.agregar_o_actualizar_producto()
-        background_color: 0.2, 0.6, 0.9, 1
-        color: 1, 1, 1, 1
-
-    # ------------------------------
-    # CAMPO DE BÚSQUEDA EN TIEMPO REAL
-    # ------------------------------
-    BoxLayout:
-        size_hint_y: None
-        height: dp(45)
-        spacing: dp(10)
-
-        TextInput:
-            id: buscar_input
-            hint_text: "Buscar producto por nombre o código..."
-            multiline: False
-            on_text: root.buscar_productos()  # 🔍 Actualiza automáticamente al escribir
-
-        Button:
-            text: "Buscar"
-            size_hint_x: None
-            width: dp(120)
-            background_color: 0.1, 0.6, 0.8, 1
-            color: 1, 1, 1, 1
-            on_release: root.buscar_productos()
-
-    # ------------------------------
-    # TABLA DE PRODUCTOS
-    # ------------------------------
-    ScrollView:
-        size_hint_y: 1
-        bar_width: dp(10)
-        scroll_type: ['bars', 'content']
-
-        BoxLayout:
-            id: tabla_productos
-            orientation: "vertical"
+        MDLabel:
+            text: "Gestión de Productos"
+            halign: "center"
+            font_style: "H4"
             size_hint_y: None
-            height: self.minimum_height
-            spacing: dp(5)
-            padding: dp(10)
-            canvas.before:
-                Color:
-                    rgba: 0.96, 0.96, 0.96, 1
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
+            height: dp(50)
 
-    Button:
-        text: "Volver al Panel"
-        size_hint_y: None
-        height: dp(45)
-        on_release: root.volver_al_panel()
-        background_color: 0.4, 0.4, 0.4, 1
-        color: 1, 1, 1, 1
+        MDBoxLayout:
+            orientation: "horizontal"
+            spacing: dp(20)
+            padding: dp(10)
+            size_hint_y: 1
+
+            # ======================================
+            # FORMULARIO IZQUIERDA
+            # ======================================
+            MDCard:
+                orientation: "vertical"
+                size_hint: 0.45, 1
+                padding: dp(25)
+                spacing: dp(20)
+                elevation: 6
+                radius: [20]
+
+                MDLabel:
+                    text: "Registrar / Editar Producto"
+                    halign: "center"
+                    font_style: "H6"
+                    size_hint_y: None
+                    height: dp(30)
+
+                MDTextField:
+                    id: nombre_input
+                    hint_text: "Nombre del producto"
+                    mode: "rectangle"
+
+                MDTextField:
+                    id: descripcion_input
+                    hint_text: "Descripción"
+                    mode: "rectangle"
+
+                MDTextField:
+                    id: precio_input
+                    hint_text: "Precio"
+                    mode: "rectangle"
+                    input_filter: "float"
+
+                MDTextField:
+                    id: stock_input
+                    hint_text: "Stock"
+                    mode: "rectangle"
+                    input_filter: "int"
+
+                MDTextField:
+                    id: fecha_input
+                    hint_text: "Fecha de vencimiento (YYYY-MM-DD)"
+                    mode: "rectangle"
+
+                MDTextField:
+                    id: codigo_input
+                    hint_text: "Código de barras"
+                    mode: "rectangle"
+
+                MDRaisedButton:
+                    id: boton_agregar
+                    text: "Agregar Producto"
+                    size_hint: None, None
+                    width: dp(220)
+                    height: dp(45)
+                    pos_hint: {"center_x": 0.5}
+                    md_bg_color: 0.2, 0.6, 0.9, 1
+                    on_release: root.agregar_o_actualizar_producto()
+
+            # ======================================
+            # TABLA DERECHA
+            # ======================================
+            MDBoxLayout:
+                orientation: "vertical"
+                size_hint: 0.55, 1
+                spacing: dp(15)
+
+                MDBoxLayout:
+                    size_hint_y: None
+                    height: dp(50)
+                    spacing: dp(10)
+                    padding: dp(5)
+
+                    MDTextField:
+                        id: buscar_input
+                        hint_text: "Buscar producto por nombre o código..."
+                        mode: "rectangle"
+                        on_text: root.buscar_productos()
+
+                    MDRaisedButton:
+                        text: "Buscar"
+                        md_bg_color: 0.1, 0.6, 0.8, 1
+                        size_hint_x: None
+                        width: dp(120)
+                        on_release: root.buscar_productos()
+
+                ScrollView:
+                    id: scroll_tabla
+                    bar_width: dp(8)
+                    scroll_type: ['bars', 'content']
+
+                    MDBoxLayout:
+                        id: tabla_productos
+                        orientation: "vertical"
+                        size_hint_y: None
+                        height: self.minimum_height
+                        spacing: dp(6)
+                        padding: dp(6)
+                        md_bg_color: 1,1,1,1
+                        radius: [10]
+
+        MDRaisedButton:
+            text: "Volver al Panel"
+            size_hint: None, None
+            width: dp(200)
+            height: dp(45)
+            pos_hint: {"center_x": 0.5}
+            md_bg_color: 0.4, 0.4, 0.4, 1
+            on_release: root.volver_al_panel()
