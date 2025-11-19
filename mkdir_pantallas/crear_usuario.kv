@@ -1,80 +1,60 @@
 <CrearUsuarioScreen>:
-    AnchorLayout:
-        anchor_x: 'center'
-        anchor_y: 'center'
+    name: "crear_usuario"
 
-        BoxLayout:
-            orientation: "vertical"
-            size_hint: 0.5, None
-            height: self.minimum_height
-            spacing: dp(20)
-            padding: dp(30)
+    MDBoxLayout:
+        orientation: "vertical"
+        spacing: dp(20)
+        padding: dp(40)
+        md_bg_color: 0.95, 0.95, 0.97, 1
 
-            Label:
-                text: "Crear nuevo usuario"
-                font_size: dp(30)
-                bold: True
-                color: 0.2, 0.2, 0.2, 1
-                size_hint_y: None
-                height: dp(40)
+        MDLabel:
+            text: "Crear nuevo usuario"
+            font_style: "H4"
+            halign: "center"
 
-            TextInput:
-                id: usuario_input
-                hint_text: "Nombre de usuario"
-                size_hint_y: None
-                height: dp(45)
-                multiline: False
+        MDTextField:
+            id: usuario_input
+            hint_text: "Nombre de usuario"
+            mode: "rectangle"
+            size_hint_x: 0.5
+            pos_hint: {"center_x": 0.5}
 
-            TextInput:
-                id: password_input
-                hint_text: "Contraseña"
-                size_hint_y: None
-                height: dp(45)
-                multiline: False
-                password: True
+        MDTextField:
+            id: password_input
+            hint_text: "Contraseña"
+            password: True
+            mode: "rectangle"
+            size_hint_x: 0.5
+            pos_hint: {"center_x": 0.5}
 
-            TextInput:
-                id: rol_input
-                hint_text: "Rol (Admin, Empleado, Preventista)"
-                size_hint_y: None
-                height: dp(45)
-                multiline: False
+        # ==============================
+        # SELECTOR DE ROL (DROPDOWN)
+        # ==============================
+        MDRectangleFlatButton:
+            id: rol_selector
+            text: "Seleccione un rol"
+            size_hint_x: 0.5
+            pos_hint: {"center_x": 0.5}
+            on_release: root.abrir_selector_roles()
 
-            Label:
-                id: mensaje_label
-                text: ""
-                font_size: dp(14)
-                size_hint_y: None
-                height: dp(25)
-                halign: 'center'
-                text_size: self.size
+        MDLabel:
+            id: mensaje_label
+            text: ""
+            halign: "center"
+            font_style: "Caption"
+            size_hint_y: None
+            height: dp(20)
 
-            Button:
-                text: "Crear Usuario"
-                size_hint: (0.5, None)
-                height: dp(50)
-                pos_hint: {"center_x": 0.5}
-                font_size: dp(18)
-                on_release: root.validar_admin()
-                canvas.before:
-                    Color:
-                        rgba: 0.2, 0.6, 0.9, 1
-                    RoundedRectangle:
-                        pos: self.pos
-                        size: self.size
-                        radius: [12]
+        MDRectangleFlatButton:
+            text: "Crear Usuario"
+            size_hint_x: 0.4
+            pos_hint: {"center_x": 0.5}
+            md_bg_color: 0.2, 0.6, 0.9, 1
+            on_release: root.validar_admin()
 
-            Button:
-                text: "Volver al Panel"
-                size_hint: (0.4, None)
-                height: dp(45)
-                pos_hint: {"center_x": 0.5}
-                font_size: dp(16)
-                on_release: root.volver_al_login()
-                canvas.before:
-                    Color:
-                        rgba: 0.5, 0.5, 0.5, 1
-                    RoundedRectangle:
-                        pos: self.pos
-                        size: self.size
-                        radius: [12]
+        MDRectangleFlatButton:
+            text: "Volver al Panel"
+            size_hint_x: 0.3
+            pos_hint: {"center_x": 0.5}
+            md_bg_color: 0.5, 0.5, 0.5, 1
+            on_release: root.volver_al_panel()

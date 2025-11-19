@@ -1,4 +1,4 @@
-from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.screenmanager import Screen
 from kivy.properties import StringProperty, NumericProperty
 from kivy.metrics import dp
 
@@ -11,11 +11,8 @@ except:
     from conexion import ejecutar_consulta
 
 
-class DetalleVentaScreen(BoxLayout):
+class DetalleVentaScreen(Screen):
 
-    # ============================
-    # PROPIEDADES NECESARIAS PARA EL KV
-    # ============================
     factura_id = StringProperty("")
     fecha = StringProperty("")
     metodo = StringProperty("")
@@ -29,30 +26,35 @@ class DetalleVentaScreen(BoxLayout):
     def __init__(self, venta_id="", **kwargs):
         super().__init__(**kwargs)
 
+        self.venta_id = venta_id
         self.factura_id = str(venta_id)
 
-        # ============================
-        # CARGAR DATOS DE VENTA
-        # ============================
+        # Cargar venta
         fila = ejecutar_consulta("""
             SELECT Fecha, TipoPago, Total, ClienteID 
             FROM Ventas 
             WHERE VentaID = ?
         """, (venta_id,))
 
-        if fila:
-            fecha, metodo, total, cliente_id = fila[0]
-
-            self.fecha = str(fecha)
-            self.metodo = metodo or "N/A"
-            self.total = float(total)
-        else:
+        if not fila:
             print("Venta no encontrada")
             return
 
-        # ============================
-        # CARGAR DATOS DEL CLIENTE
-        # ============================
+        fecha, metodo, total, cliente_id = fila[0]
+
+        from datetime import datetime
+
+        try:
+            f = datetime.strptime(str(fecha), "%Y-%m-%d %H:%M:%S.%f")
+            self.fecha = f.strftime("%d/%m/%Y")
+        except:
+            self.fecha = str(fecha).split(" ")[0]
+
+        self.metodo = metodo or "N/A"
+        self.total = float(total)
+
+
+        # Cargar cliente
         fila_cliente = ejecutar_consulta("""
             SELECT Nombre, Telefono, Email, CUIT
             FROM Clientes
@@ -62,30 +64,30 @@ class DetalleVentaScreen(BoxLayout):
         if fila_cliente:
             self.cli_nombre, self.cli_tel, self.cli_email, self.cli_cuit = fila_cliente[0]
 
-        # ============================
-        # CARGAR DETALLE DE PRODUCTOS
-        # ============================
+        # Cargar productos
         tabla = self.ids.tabla_items
-        filas_detalle = ejecutar_consulta("""
-            SELECT P.Nombre, VD.Cantidad, VD.PrecioUnitario, (VD.Cantidad * VD.PrecioUnitario)
+
+        productos = ejecutar_consulta("""
+            SELECT P.Nombre, VD.Cantidad, VD.PrecioUnitario,
+                   (VD.Cantidad * VD.PrecioUnitario) AS Subtotal
             FROM VentaDetalle VD
             JOIN Productos P ON P.ProductoID = VD.ProductoID
             WHERE VD.VentaID = ?
         """, (venta_id,))
 
-        for nombre, cant, precio, subtotal in filas_detalle:
-            from kivy.uix.label import Label
+        from kivy.uix.label import Label
+
+        for nombre, cant, precio, subtotal in productos:
+
             tabla.add_widget(Label(text=str(nombre), font_size=16, color=(0,0,0,1)))
             tabla.add_widget(Label(text=str(cant), font_size=16, color=(0,0,0,1)))
             tabla.add_widget(Label(text=f"${precio:.2f}", font_size=16, color=(0,0,0,1)))
             tabla.add_widget(Label(text=f"${subtotal:.2f}", font_size=16, color=(0,0,0,1)))
 
+    # BOTÓN PDF
     def generar_pdf(self):
-        print("Generar PDF (luego lo implementamos)")
+        print("PDF pronto")
 
+    # BOTÓN VOLVER
     def volver(self):
-        from kivy.app import App
-        from mkdir_pantallas.ventas_admin import VentasAdminScreen
-        root = App.get_running_app().root
-        root.clear_widgets()
-        root.add_widget(VentasAdminScreen())
+        self.manager.current = "ventas_admin"

@@ -1,77 +1,100 @@
+#:import dp kivy.metrics.dp
+
 <ClientesScreen>:
-    orientation: "vertical"
-    padding: dp(20)
-    spacing: dp(10)
 
-    # --------------------
-    # CABECERA CON SALIR
-    # --------------------
     BoxLayout:
-        size_hint_y: None
-        height: dp(45)
+        orientation: "vertical"
+        padding: dp(20)
+        spacing: dp(15)
 
-        Label:
-            text: "Gestión de Clientes"
-            font_size: dp(24)
-            bold: True
-            color: 0,0,0,1
+        # --------------------------------------------------------
+        #      CABECERA (TÍTULO + VOLVER)
+        # --------------------------------------------------------
+        BoxLayout:
+            size_hint_y: None
+            height: dp(50)
 
+            Label:
+                text: "Gestión de Clientes"
+                font_size: dp(26)
+                bold: True
+                color: 0.15, 0.15, 0.15, 1
+
+            Button:
+                text: "< Volver"
+                size_hint: None, None
+                size: dp(100), dp(40)
+                color: 1,1,1,1
+                background_color: 0.07, 0.20, 0.40, 1   # Azul oscuro
+                canvas.before:
+                    Color:
+                        rgba: self.background_color
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [10]
+                on_release: root.volver_menu()
+
+        # --------------------------------------------------------
+        #  BUSCADOR
+        # --------------------------------------------------------
+        BoxLayout:
+            size_hint_y: None
+            height: dp(45)
+            spacing: dp(10)
+
+            TextInput:
+                id: input_busqueda
+                hint_text: "Buscar cliente por nombre o CUIT..."
+                multiline: False
+                padding: [dp(10), dp(10)]
+                background_normal: ""
+                background_color: 1,1,1,1
+
+            Button:
+                text: "Buscar"
+                size_hint_x: None
+                width: dp(130)
+                color: 1,1,1,1
+                background_color: 0.18, 0.45, 0.75, 1    # Azul medio (igual Facturación)
+                canvas.before:
+                    Color:
+                        rgba: self.background_color
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [10]
+                on_release: root.cargar_clientes(input_busqueda.text)
+
+        # --------------------------------------------------------
+        #  BOTÓN NUEVO CLIENTE
+        # --------------------------------------------------------
         Button:
-            text: "Salir"
-            size_hint: None, None
-            size: dp(80), dp(35)
-            on_release: root.volver_menu()
+            text: "Nuevo Cliente"
+            size_hint_y: None
+            height: dp(48)
+            font_size: dp(18)
             color: 1,1,1,1
+            background_color: 0.10, 0.55, 0.25, 1   # Verde suave (igual Facturación)
             canvas.before:
                 Color:
-                    rgba: 0.9, 0.2, 0.2, 1
+                    rgba: self.background_color
                 RoundedRectangle:
                     pos: self.pos
                     size: self.size
-                    radius: [8]
+                    radius: [12]
+            on_release: root.abrir_popup_nuevo()
 
-    # ------------------------
-    # BARRA DE BÚSQUEDA
-    # ------------------------
-    BoxLayout:
-        size_hint_y: None
-        height: dp(45)
-        spacing: dp(10)
+        # --------------------------------------------------------
+        #  TABLA DE CLIENTES
+        # --------------------------------------------------------
+        ScrollView:
+            bar_width: dp(10)
 
-        TextInput:
-            id: input_busqueda
-            hint_text: "Buscar cliente por nombre o CUIT..."
-            multiline: False
-            on_text_validate: root.cargar_clientes(self.text)
-
-        Button:
-            text: "Buscar"
-            size_hint_x: None
-            width: dp(120)
-            background_color: 0.2, 0.6, 0.9, 1
-            color: 1, 1, 1, 1
-            on_release: root.cargar_clientes(input_busqueda.text)
-
-    # ------------------------
-    # NUEVO CLIENTE
-    # ------------------------
-    Button:
-        text: "Nuevo Cliente"
-        size_hint_y: None
-        height: dp(45)
-        background_color: 0.1, 0.5, 0.2, 1
-        color: 1, 1, 1, 1
-        on_release: root.abrir_popup_nuevo()
-
-    # ------------------------
-    # TABLA
-    # ------------------------
-    ScrollView:
-        size_hint_y: 1
-
-        BoxLayout:
-            id: tabla_clientes
-            orientation: "vertical"
-            size_hint_y: None
-            height: self.minimum_height
-            spacing: dp(4)
+            BoxLayout:
+                id: tabla_clientes
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(8)
+                padding: dp(5)

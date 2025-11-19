@@ -1,40 +1,19 @@
-from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
+from kivymd.uix.screen import MDScreen
 
-class PanelAdminScreen(BoxLayout):
-    """Pantalla de administración para el rol Administrador"""
+class PanelAdminScreen(MDScreen):
 
     def ir_a_crear_usuario(self):
-        """Ir a la pantalla para crear usuarios"""
         from mkdir_pantallas.crear_usuario import CrearUsuarioScreen
-        app = App.get_running_app()
-        root = app.root
-        root.clear_widgets()
-        root.add_widget(CrearUsuarioScreen())
+        self.manager.switch_to(CrearUsuarioScreen(name="crear_usuario"))
 
     def ir_a_agregar_producto(self):
-        """Ir a la pantalla de gestión de productos"""
         from mkdir_pantallas.agregar_producto import AgregarProductoScreen
-        app = App.get_running_app()
-        root = app.root
-        root.clear_widgets()
-        root.add_widget(AgregarProductoScreen())
+        self.manager.switch_to(AgregarProductoScreen(name="agregar_producto"))
 
     def volver_al_login(self):
-        """Volver a la pantalla de login"""
         from mkdir_pantallas.login import LoginScreen
-        app = App.get_running_app()
-        root = app.root
-        root.clear_widgets()
-        root.add_widget(LoginScreen())
+        self.manager.switch_to(LoginScreen(name="login"))
 
-    # ======================================================
-    # NUEVA FUNCIÓN → VER VENTAS / FACTURAS
-    # ======================================================
     def ir_a_ver_ventas(self):
-        """Ir a la pantalla donde se listan las ventas/facturas"""
         from mkdir_pantallas.ventas_admin import VentasAdminScreen
-        app = App.get_running_app()
-        root = app.root
-        root.clear_widgets()
-        root.add_widget(VentasAdminScreen())
+        self.manager.switch_to(VentasAdminScreen(name="ventas_admin"))

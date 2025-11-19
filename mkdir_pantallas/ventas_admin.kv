@@ -1,44 +1,55 @@
+#:import dp kivy.metrics.dp
+
 <VentasAdminScreen>:
-    orientation: "vertical"
-    padding: dp(20)
-    spacing: dp(10)
 
-    Label:
-        text: "Ventas Registradas"
-        font_size: dp(32)
-        bold: True
-        color: 0, 0, 0, 1
-        size_hint_y: None
-        height: dp(60)
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
+        spacing: dp(15)
 
-    # -------------------
-    # BUSCADOR
-    # -------------------
-    TextInput:
-        id: txt_buscar
-        hint_text: "Buscar por ID, Fecha, Cliente o Total..."
-        size_hint_y: None
-        height: dp(45)
-        multiline: False
-        on_text: root.filtrar_busqueda(self.text)
+        canvas.before:
+            Color:
+                rgba: 0.96, 0.96, 0.98, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
 
-
-    ScrollView:
-        size_hint_y: 1
-
-        GridLayout:
-            id: tabla_ventas
-            cols: 6
-            row_default_height: dp(40)
-            spacing: dp(10)
-            padding: dp(10)
+        # -------------------------
+        # Título y botón volver
+        # -------------------------
+        BoxLayout:
             size_hint_y: None
-            height: self.minimum_height
+            height: dp(60)
 
-    Button:
-        text: "< Volver"
-        size_hint: (1, None)
-        height: dp(50)
-        background_color: 0.3, 0.3, 0.3, 1
-        color: 1, 1, 1, 1
-        on_release: root.volver()
+            Label:
+                text: "Ventas Registradas"
+                font_size: dp(32)
+                bold: True
+                color: 0.2, 0.2, 0.2, 1
+
+            Button:
+                text: "< Volver"
+                size_hint: None, None
+                size: dp(120), dp(40)
+                color: 1,1,1,1
+                background_color: 0.07, 0.20, 0.40, 1
+                on_release: root.volver()
+
+        TextInput:
+            id: txt_buscar
+            hint_text: "Buscar por ID, Fecha, Cliente o Total..."
+            size_hint_y: None
+            height: dp(48)
+            multiline: False
+            on_text: root.filtrar_busqueda(self.text)
+
+        ScrollView:
+            GridLayout:
+                id: tabla_ventas
+                cols: 6
+                spacing: dp(10)
+                padding: dp(10)
+                size_hint_y: None
+                height: self.minimum_height
+                row_default_height: dp(45)
+                row_force_default: True

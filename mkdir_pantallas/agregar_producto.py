@@ -1,49 +1,36 @@
-from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.label import Label
-from kivy.uix.button import Button
+from kivymd.uix.screen import MDScreen
+from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.button import MDRaisedButton
+from kivymd.uix.label import MDLabel
 from kivy.metrics import dp
 from kivy.clock import Clock
-from kivy.lang import Builder
-import os
+from kivy.app import App
+
 from mkdir_database.conexion import ejecutar_consulta
 
-# Cargar el KV
-ruta_kv = os.path.join(os.path.dirname(__file__), "agregar_producto.kv")
-if os.path.exists(ruta_kv):
-    Builder.load_file(ruta_kv)
-    print("✅ agregar_producto.kv cargado correctamente.")
-else:
-    print("⚠️ No se encontró agregar_producto.kv en:", ruta_kv)
 
+class AgregarProductoScreen(MDScreen):
 
-class AgregarProductoScreen(BoxLayout):
+    tabla = None
     producto_editando_id = None
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        Clock.schedule_once(self._esperar_tabla, 0.3)
+    def on_enter(self, *args):
+        """Cargar productos al entrar a la pantalla"""
+        Clock.schedule_once(lambda dt: self.mostrar_productos(), 0.2)
 
-    def _esperar_tabla(self, dt):
-        if "tabla_productos" in self.ids:
-            self.mostrar_productos()
-        else:
-            Clock.schedule_once(self._esperar_tabla, 0.2)
-
-    # ------------------------------
-    # AGREGAR o ACTUALIZAR
-    # ------------------------------
+    # ========================================================
+    # AGREGAR O ACTUALIZAR PRODUCTO
+    # ========================================================
     def agregar_o_actualizar_producto(self):
         nombre = self.ids.nombre_input.text.strip()
         descripcion = self.ids.descripcion_input.text.strip()
         precio = self.ids.precio_input.text.strip()
         stock = self.ids.stock_input.text.strip()
-        fecha_venc = self.ids.fecha_input.text.strip()
-        codigo_barras = self.ids.codigo_input.text.strip()
+        fecha = self.ids.fecha_input.text.strip()
+        codigo = self.ids.codigo_input.text.strip()
 
         if not nombre or not precio or not stock:
-            print("⚠️ Debes completar al menos el nombre, precio y stock.")
+            print("⚠ Debes completar nombre, precio y stock.")
             return
 
         try:
@@ -52,32 +39,35 @@ class AgregarProductoScreen(BoxLayout):
                     INSERT INTO Productos (Nombre, Descripcion, Precio, Stock, FechaVencimiento, CodigoBarras)
                     VALUES (?, ?, ?, ?, ?, ?)
                 """
-                parametros = (nombre, descripcion, float(precio), int(stock), fecha_venc or None, codigo_barras)
-                ejecutar_consulta(consulta, parametros)
-                print("✅ Producto agregado correctamente.")
+                ejecutar_consulta(
+                    consulta,
+                    (nombre, descripcion, float(precio), int(stock), fecha or None, codigo)
+                )
+                print("🟢 Producto agregado.")
             else:
                 consulta = """
                     UPDATE Productos
                     SET Nombre=?, Descripcion=?, Precio=?, Stock=?, FechaVencimiento=?, CodigoBarras=?
                     WHERE ProductoID=?
                 """
-                parametros = (
-                    nombre, descripcion, float(precio), int(stock), fecha_venc or None,
-                    codigo_barras, self.producto_editando_id
+                ejecutar_consulta(
+                    consulta,
+                    (nombre, descripcion, float(precio), int(stock),
+                     fecha or None, codigo, self.producto_editando_id)
                 )
-                ejecutar_consulta(consulta, parametros)
-                print(f"🟢 Producto {self.producto_editando_id} actualizado.")
+                print("🟢 Producto actualizado.")
                 self.producto_editando_id = None
                 self.ids.boton_agregar.text = "Agregar Producto"
 
             self.limpiar_campos()
             self.mostrar_productos()
-        except Exception as e:
-            print(f"❌ Error al guardar producto: {e}")
 
-    # ------------------------------
-    # BUSCAR PRODUCTOS
-    # ------------------------------
+        except Exception as e:
+            print("❌ Error:", e)
+
+    # ========================================================
+    # BUSCADOR
+    # ========================================================
     def buscar_productos(self):
         texto = self.ids.buscar_input.text.strip()
         if texto == "":
@@ -89,99 +79,117 @@ class AgregarProductoScreen(BoxLayout):
             FROM Productos
             WHERE Nombre LIKE ? OR CodigoBarras LIKE ?
         """
-        parametro = f"%{texto}%"
-        resultados = ejecutar_consulta(consulta, (parametro, parametro))
+        like = f"%{texto}%"
+        resultados = ejecutar_consulta(consulta, (like, like))
         self.mostrar_productos(resultados)
 
-    # ------------------------------
-    # MOSTRAR PRODUCTOS
-    # ------------------------------
+    # ========================================================
+    # TABLA MANUAL MEJORADA VISUALMENTE
+    # ========================================================
     def mostrar_productos(self, resultados=None):
-        if "tabla_productos" not in self.ids:
-            print("⚠️ No se encontró el id 'tabla_productos'")
-            return
 
         contenedor = self.ids.tabla_productos
         contenedor.clear_widgets()
 
+        # Cargar todos los productos
         if resultados is None:
             resultados = ejecutar_consulta(
                 "SELECT ProductoID, Nombre, Descripcion, Precio, Stock FROM Productos"
             )
 
-        if not resultados:
-            contenedor.add_widget(Label(text="No hay productos registrados", color=(0, 0, 0, 1)))
-            return
+        # ---------- ENCABEZADO ----------
+        header = MDBoxLayout(
+            orientation="horizontal",
+            spacing=dp(10),
+            size_hint_y=None,
+            height=dp(40),
+            padding=dp(5),
+            md_bg_color=(0.90, 0.90, 0.92, 1),
+            radius=[10]
+        )
 
-        header = GridLayout(cols=7, size_hint_y=None, height=dp(35))
-        for titulo in ["ID", "Nombre", "Descripción", "Precio", "Stock", "Editar", "Eliminar"]:
-            header.add_widget(Label(text=titulo, bold=True, color=(0, 0, 0, 1)))
+        for title in ["ID", "Nombre", "Descripción", "Precio", "Stock", "Editar", "Eliminar"]:
+            header.add_widget(MDLabel(text=title, bold=True, halign="center"))
+
         contenedor.add_widget(header)
 
-        for fila in resultados:
-            producto_id, nombre, desc, precio, stock = fila
-            fila_layout = GridLayout(cols=7, size_hint_y=None, height=dp(35))
-            for valor in [producto_id, nombre, desc, precio, stock]:
-                fila_layout.add_widget(Label(text=str(valor), color=(0, 0, 0, 1)))
+        # ---------- FILAS ----------
+        for i, producto in enumerate(resultados):
+            pid, nombre, descripcion, precio, stock = producto
 
-            btn_edit = Button(
+            bg_color = (0.97, 0.97, 0.97, 1) if i % 2 == 0 else (1, 1, 1, 1)
+
+            fila = MDBoxLayout(
+                orientation="horizontal",
+                spacing=dp(10),
+                size_hint_y=None,
+                height=dp(40),
+                padding=dp(5),
+                md_bg_color=bg_color,
+                radius=[10]
+            )
+
+            fila.add_widget(MDLabel(text=str(pid), halign="center"))
+            fila.add_widget(MDLabel(text=nombre, halign="center"))
+            fila.add_widget(MDLabel(text=descripcion or "", halign="center"))
+            fila.add_widget(MDLabel(text=f"{precio:,.2f}", halign="center"))
+            fila.add_widget(MDLabel(text=str(stock), halign="center"))
+
+            # Botón editar
+            btn_editar = MDRaisedButton(
                 text="Editar",
-                size_hint_x=None,
+                md_bg_color=(0, 0.6, 0.2, 1),
+                size_hint=(None, None),
                 width=dp(80),
-                background_color=(0.0, 0.6, 0.0, 1),
-                color=(1, 1, 1, 1),
-                on_release=lambda btn, pid=producto_id: self.editar_producto(pid)
+                height=dp(32),
+                on_release=lambda x, id=pid: self.editar_producto(id)
             )
-            fila_layout.add_widget(btn_edit)
 
-            btn_del = Button(
+            # Botón eliminar
+            btn_eliminar = MDRaisedButton(
                 text="Eliminar",
-                size_hint_x=None,
+                md_bg_color=(0.8, 0, 0, 1),
+                size_hint=(None, None),
                 width=dp(80),
-                background_color=(0.8, 0.1, 0.1, 1),
-                color=(1, 1, 1, 1),
-                on_release=lambda btn, pid=producto_id: self.eliminar_producto(pid)
+                height=dp(32),
+                on_release=lambda x, id=pid: self.eliminar_producto(id)
             )
-            fila_layout.add_widget(btn_del)
 
-            contenedor.add_widget(fila_layout)
+            fila.add_widget(btn_editar)
+            fila.add_widget(btn_eliminar)
 
-    # ------------------------------
-    # EDITAR
-    # ------------------------------
-    def editar_producto(self, producto_id):
-        consulta = "SELECT * FROM Productos WHERE ProductoID = ?"
-        datos = ejecutar_consulta(consulta, (producto_id,))
+            contenedor.add_widget(fila)
+
+    # ========================================================
+    # EDITAR PRODUCTO
+    # ========================================================
+    def editar_producto(self, pid):
+        datos = ejecutar_consulta("SELECT * FROM Productos WHERE ProductoID=?", (pid,))
         if not datos:
-            print("⚠️ No se encontró el producto.")
             return
 
-        producto = datos[0]
-        self.ids.nombre_input.text = producto[1] or ""
-        self.ids.descripcion_input.text = producto[2] or ""
-        self.ids.precio_input.text = str(producto[3] or "")
-        self.ids.stock_input.text = str(producto[4] or "")
-        self.ids.fecha_input.text = str(producto[5] or "")
-        self.ids.codigo_input.text = producto[6] or ""
-        self.producto_editando_id = producto_id
+        p = datos[0]
+        self.ids.nombre_input.text = p[1] or ""
+        self.ids.descripcion_input.text = p[2] or ""
+        self.ids.precio_input.text = str(p[3] or "")
+        self.ids.stock_input.text = str(p[4] or "")
+        self.ids.fecha_input.text = str(p[5] or "")
+        self.ids.codigo_input.text = p[6] or ""
+
+        self.producto_editando_id = pid
         self.ids.boton_agregar.text = "Guardar Cambios"
-        print(f"✏️ Editando producto {producto_id}")
 
-    # ------------------------------
-    # ELIMINAR
-    # ------------------------------
-    def eliminar_producto(self, producto_id):
-        try:
-            consulta = "DELETE FROM Productos WHERE ProductoID = ?"
-            ejecutar_consulta(consulta, (producto_id,))
-            print(f"🗑️ Producto {producto_id} eliminado correctamente.")
-            self.mostrar_productos()
-        except Exception as e:
-            print(f"❌ Error al eliminar producto: {e}")
+    # ========================================================
+    # ELIMINAR PRODUCTO
+    # ========================================================
+    def eliminar_producto(self, pid):
+        ejecutar_consulta("DELETE FROM Productos WHERE ProductoID=?", (pid,))
+        print("🗑 Producto eliminado:", pid)
+        self.mostrar_productos()
 
-    # ------------------------------
-    # LIMPIAR
-    # ------------------------------
+    # ========================================================
+    # LIMPIAR CAMPOS
+    # ========================================================
     def limpiar_campos(self):
         for campo in [
             "nombre_input", "descripcion_input", "precio_input",
@@ -189,12 +197,9 @@ class AgregarProductoScreen(BoxLayout):
         ]:
             self.ids[campo].text = ""
 
-    # ------------------------------
+    # ========================================================
     # VOLVER
-    # ------------------------------
+    # ========================================================
     def volver_al_panel(self):
         from mkdir_pantallas.panel_admin import PanelAdminScreen
-        app = App.get_running_app()
-        root = app.root
-        root.clear_widgets()
-        root.add_widget(PanelAdminScreen())
+        self.manager.switch_to(PanelAdminScreen())

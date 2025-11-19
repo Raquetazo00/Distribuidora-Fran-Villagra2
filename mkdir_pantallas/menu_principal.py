@@ -1,4 +1,4 @@
-from kivy.uix.boxlayout import BoxLayout
+from kivymd.uix.screen import MDScreen
 from kivy.clock import Clock
 from kivy.properties import StringProperty
 from datetime import datetime
@@ -15,7 +15,7 @@ except:
     from conexion import ejecutar_consulta
 
 
-class MenuPrincipalScreen(BoxLayout):
+class MenuPrincipalScreen(MDScreen):
     hora_actual = StringProperty("00:00:00")
     _evento_busqueda = None
 
@@ -34,17 +34,7 @@ class MenuPrincipalScreen(BoxLayout):
         self.hora_actual = datetime.now().strftime("%H:%M:%S")
 
     # ---------------------------
-    # Ir a clientes
-    # ---------------------------
-    def ir_clientes(self):
-        from mkdir_pantallas.clientes import ClientesScreen
-        self.clear_widgets()
-        pantalla = ClientesScreen()
-        pantalla.cargar_clientes()
-        self.add_widget(pantalla)
-
-    # ---------------------------
-    # Buscar producto
+    # Buscar producto (automático)
     # ---------------------------
     def programar_busqueda(self, texto):
         if self._evento_busqueda:
@@ -53,6 +43,9 @@ class MenuPrincipalScreen(BoxLayout):
             lambda dt: self.buscar_producto(texto), 0.5
         )
 
+    # ---------------------------
+    # Buscar producto
+    # ---------------------------
     def buscar_producto(self, texto):
         texto = (texto or "").strip()
         tabla = self.ids.tabla_productos
@@ -117,7 +110,7 @@ class MenuPrincipalScreen(BoxLayout):
         self.actualizar_tabla_carrito()
 
     # ---------------------------
-    # Incrementar / Decrementar
+    # Incrementar / Decrementar cantidad
     # ---------------------------
     def inc_cantidad(self, pid):
         stock = self.stock_productos.get(pid, 0)
@@ -133,7 +126,7 @@ class MenuPrincipalScreen(BoxLayout):
         self.actualizar_tabla_carrito()
 
     # ---------------------------
-    # Quitar producto
+    # Eliminar producto
     # ---------------------------
     def eliminar_producto(self, producto):
         pid = producto[0]
@@ -166,9 +159,11 @@ class MenuPrincipalScreen(BoxLayout):
 
             cantidad_box = Bx(size_hint_x=None, width=dp(140), spacing=dp(5))
             cantidad_box.add_widget(
-                Button(text="-", width=dp(40), size_hint_x=None,
-                       background_color=(0.9, 0.2, 0.2, 1), color=(1, 1, 1, 1),
-                       on_release=lambda x, _pid=pid: self.dec_cantidad(_pid))
+                Button(
+                    text="-", width=dp(40), size_hint_x=None,
+                    background_color=(0.9, 0.2, 0.2, 1), color=(1, 1, 1, 1),
+                    on_release=lambda x, _pid=pid: self.dec_cantidad(_pid)
+                )
             )
 
             cantidad_box.add_widget(
@@ -176,18 +171,22 @@ class MenuPrincipalScreen(BoxLayout):
             )
 
             cantidad_box.add_widget(
-                Button(text="+", width=dp(40), size_hint_x=None,
-                       background_color=(0.1, 0.7, 0.5, 1), color=(1, 1, 1, 1),
-                       on_release=lambda x, _pid=pid: self.inc_cantidad(_pid))
+                Button(
+                    text="+", width=dp(40), size_hint_x=None,
+                    background_color=(0.1, 0.7, 0.5, 1), color=(1, 1, 1, 1),
+                    on_release=lambda x, _pid=pid: self.inc_cantidad(_pid)
+                )
             )
 
             fila.add_widget(cantidad_box)
             fila.add_widget(Label(text=f"${subtotal:.2f}", color=(0, 0, 0, 1)))
 
             fila.add_widget(
-                Button(text="Eliminar", width=dp(100), size_hint_x=None,
-                       background_color=(0.7, 0.1, 0.1, 1), color=(1, 1, 1, 1),
-                       on_release=lambda x, p=(pid, nombre, desc, precio, stock): self.eliminar_producto(p))
+                Button(
+                    text="Eliminar", width=dp(100), size_hint_x=None,
+                    background_color=(0.7, 0.1, 0.1, 1), color=(1, 1, 1, 1),
+                    on_release=lambda x, p=(pid, nombre, desc, precio, stock): self.eliminar_producto(p)
+                )
             )
 
             tabla.add_widget(fila)
@@ -195,7 +194,7 @@ class MenuPrincipalScreen(BoxLayout):
         self.ids.lbl_total.text = f"Total: ${total:.2f}"
 
     # ---------------------------
-    # Previsualizar -> Ir a Facturación
+    # Previsualizar → Ir a Facturación
     # ---------------------------
     def previsualizar_venta(self):
         if not self.carrito:
@@ -235,12 +234,17 @@ class MenuPrincipalScreen(BoxLayout):
         botones = Bx(size_hint_y=None, height=dp(40), spacing=dp(10))
 
         btn_ok = Button(
-            text="Confirmar", background_color=(0, 0.7, 0.3, 1), color=(1, 1, 1, 1),
+            text="Confirmar",
+            background_color=(0, 0.7, 0.3, 1),
+            color=(1, 1, 1, 1),
             on_release=lambda x: self.ir_a_facturacion(popup)
         )
+
         btn_cancel = Button(
-            text="Cancelar", background_color=(0.8, 0.1, 0.1, 1),
-            color=(1, 1, 1, 1), on_release=lambda x: popup.dismiss()
+            text="Cancelar",
+            background_color=(0.8, 0.1, 0.1, 1),
+            color=(1, 1, 1, 1),
+            on_release=lambda x: popup.dismiss()
         )
 
         botones.add_widget(btn_ok)
@@ -250,17 +254,17 @@ class MenuPrincipalScreen(BoxLayout):
         popup = Popup(
             title="Previsualización",
             content=resumen,
-            size_hint=(None, None), size=(600, 500)
+            size_hint=(None, None),
+            size=(600, 500)
         )
         popup.open()
 
     # ---------------------------
-    # IR A FACTURACIÓN (CORREGIDO)
+    # Ir a facturación
     # ---------------------------
     def ir_a_facturacion(self, popup):
         from mkdir_pantallas.facturacion import FacturaScreen
 
-        # formatear carrito
         carrito_formateado = []
         for pid, nombre, desc, precio, stock in self.carrito:
             qty = self.cantidades[pid]
@@ -272,11 +276,9 @@ class MenuPrincipalScreen(BoxLayout):
                 "subtotal": float(precio) * qty
             })
 
-        # crear pantalla de factura
         factura = FacturaScreen()
         factura.set_carrito_inicial(carrito_formateado)
 
-        # cargar productos disponibles
         try:
             filas = ejecutar_consulta("SELECT ProductoID, Nombre, Precio FROM Productos", ())
             factura.productos_disponibles = [
@@ -288,13 +290,10 @@ class MenuPrincipalScreen(BoxLayout):
 
         popup.dismiss()
 
-        # REEMPLAZA la pantalla actual con la de facturación SIN usar ScreenManager
-        self.clear_widgets()
-        self.add_widget(factura)
-
+        self.manager.switch_to(factura)
 
     # ---------------------------
-    # Salir
+    # Salir → Volver Login
     # ---------------------------
     def confirmar_salida(self):
         box = Bx(orientation="vertical", spacing=dp(10), padding=dp(15))
@@ -323,5 +322,4 @@ class MenuPrincipalScreen(BoxLayout):
     def _salir_confirmado(self, popup):
         popup.dismiss()
         from mkdir_pantallas.login import LoginScreen
-        self.clear_widgets()
-        self.add_widget(LoginScreen())
+        self.manager.switch_to(LoginScreen(name="login"))
